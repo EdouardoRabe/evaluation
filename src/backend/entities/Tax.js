@@ -55,27 +55,35 @@ class Tax {
     async getBy(fieldName, value = this[fieldName]) {
         if (value === undefined || value === null || value === "") return []
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
+        
+        const normalized = new Set(values.map(String))
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return false
-            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.includes(iv))
-            return normalized.includes(String(v))
+            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+            return normalized.has(String(v))
         })
     }
 
     async getByNot(fieldName, value = this[fieldName]) {
         if (value === undefined || value === null || value === "") return await this.getAll()
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
+        
+        const normalized = new Set(values.map(String))
 
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return true
-            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
-            return !normalized.includes(String(v))
+            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.has(iv))
+            return !normalized.has(String(v))
         })
     }
 
@@ -93,7 +101,10 @@ class Tax {
     }
 
     async getByNotApi(fieldName, value = this[fieldName]) {
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
         const normalized = values.map((v) => String(v).trim()).filter((s) => s !== "")
 
         if (normalized.length === 0) return []
@@ -123,7 +134,7 @@ class Tax {
 
     // filtre cote client
     async getAll(excludeIds = []) {
-        const excluded = new Set((excludeIds ?? []).map((id) => Number(id)))
+        const excluded = new Set((excludeIds ?? []).map(Number))
         const xml = await api.get(`${this.endpoint}?display=full`)
         const taxes = toJSONList(xml)
 
@@ -134,7 +145,7 @@ class Tax {
 
     // filtre cote API prestashop
     async getAllFiltered(excludeIds = []) {
-        const ids = (excludeIds ?? []).map((id) => Number(id)).filter((id) => Number.isFinite(id))
+        const ids = (excludeIds ?? []).map(Number).filter((id) => Number.isFinite(id))
         const filter = ids.length > 0 ? `&filter[id]=![${ids.join("|")}]` : ""
         const xml = await api.get(`${this.endpoint}?display=full${filter}`)
         const taxes = toJSONList(xml)
@@ -142,14 +153,18 @@ class Tax {
         return taxes.map((a) => Tax.fromData(a))
     }
 
+    async getAllApi(excludeIds = []) {
+        return await this.getAllFiltered(excludeIds)
+    }
+
     async getExcl(excludeIds = []) {
-        const excluded = new Set((excludeIds ?? []).map((id) => Number(id)))
+        const excluded = new Set((excludeIds ?? []).map(Number))
         const all = await this.getAll()
         return all.filter((a) => !excluded.has(Number(a.id)))
     }
 
     async getIncl(includeIds = []) {
-        const included = new Set((includeIds ?? []).map((id) => Number(id)))
+        const included = new Set((includeIds ?? []).map(Number))
         const all = await this.getAll()
         return all.filter((a) => included.has(Number(a.id)))
     }

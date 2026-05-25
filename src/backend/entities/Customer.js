@@ -3,6 +3,12 @@ import {toJSON, toJSONList, toXML} from "../xml/customerXML"
 import { buildApiFilterQuery } from "../utils/utils"
 import Address from "./Address"
 
+const toList = (value) => {
+    if (Array.isArray(value)) return value
+    if (value instanceof Set) return Array.from(value)
+    return [value]
+}
+
 class Customer {
     endpoint = "customers"
 
@@ -154,37 +160,40 @@ class Customer {
         return customers.map((customerData) => Customer.fromData(customerData))
     }
 
+    async getAllApi(excludeIds = []) {
+        return await this.getAllFiltered(excludeIds)
+    }
+
     async getBy(fieldName, value = this[fieldName]) {
         // client-side filter: fetch all and filter locally
         if (value === undefined || value === null || value === "") return []
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        const values = toList(value)
+        const normalized = new Set(values.map(String))
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return false
-            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.includes(iv))
-            return normalized.includes(String(v))
+            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+            return normalized.has(String(v))
         })
     }
 
     async getByNot(fieldName, value = this[fieldName]) {
         if (value === undefined || value === null || value === "") return await this.getAll()
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        const values = toList(value)
+        const normalized = new Set(values.map(String))
 
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return true
-            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
-            return !normalized.includes(String(v))
+            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.has(iv))
+            return !normalized.has(String(v))
         })
     }
 
     async getByNotApi(fieldName, value = this[fieldName]) {
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v).trim()).filter((s) => s !== "")
+        const normalized = toList(value).map(String).map((v) => v.trim()).filter((s) => s !== "")
 
         if (normalized.length === 0) return []
 
@@ -201,32 +210,19 @@ class Customer {
     }
 
     async getExcl(excludeIds = []) {
-        const excluded = new Set()
-        for (const id of excludeIds ?? []) {
-            excluded.add(Number(id))
-        }
+        const excluded = new Set((excludeIds ?? []).map(Number))
         const all = await this.getAll()
         return all.filter((o) => !excluded.has(Number(o.id)))
     }
 
     async getIncl(includeIds = []) {
-        const included = new Set()
-        for (const id of includeIds ?? []) {
-            included.add(Number(id))
-        }
+        const included = new Set((includeIds ?? []).map(Number))
         const all = await this.getAll()
         return all.filter((o) => included.has(Number(o.id)))
     }
 
     async getExclApi(excludeIds = []) {
-        const ids = []
-        for (const id of excludeIds ?? []) {
-            const numericId = Number(id)
-
-            if (Number.isFinite(numericId)) {
-                ids.push(numericId)
-            }
-        }
+        const ids = (excludeIds ?? []).map(Number).filter(Number.isFinite)
         const filter = ids.length > 0 ? `&filter[id]=![${ids.join("|")}]` : ""
         const xml = await api.get(`${this.endpoint}?display=full${filter}`)
         const Customers = toJSONList(xml)
@@ -234,14 +230,7 @@ class Customer {
     }
 
     async getInclApi(includeIds = []) {
-        const ids = []
-        for (const id of includeIds ?? []) {
-            const numericId = Number(id)
-
-            if (Number.isFinite(numericId)) {
-                ids.push(numericId)
-            }
-        }
+        const ids = (includeIds ?? []).map(Number).filter(Number.isFinite)
         const filter = ids.length > 0 ? `&filter[id]=[${ids.join("|")}]` : ""
         const xml = await api.get(`${this.endpoint}?display=full${filter}`)
         const Customers = toJSONList(xml)

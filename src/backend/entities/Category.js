@@ -1,6 +1,12 @@
 import api from "../utils/api"
 import { toJSON, toJSONList, toXML } from "../xml/categoryXML"
 
+const toList = (value) => {
+    if (Array.isArray(value)) return value
+    if (value instanceof Set) return Array.from(value)
+    return [value]
+}
+
 class Category {
     endpoint = "categories"
 
@@ -97,14 +103,23 @@ class Category {
         return categories.map((c) => Category.fromData(c))
     }
 
+    async getAllApi(excludeIds = []) {
+        const ids = (excludeIds ?? []).map(Number).filter(Number.isFinite)
+        const filter = ids.length > 0 ? `&filter[id]=![${ids.join("|")}]` : ""
+        const xml = await api.get(`${this.endpoint}?display=full${filter}`)
+        const categories = toJSONList(xml)
+
+        return categories.map((c) => Category.fromData(c))
+    }
+
     async getExcl(excludeIds = []) {
-        const excluded = new Set((excludeIds ?? []).map((id) => Number(id)))
+        const excluded = new Set((excludeIds ?? []).map(Number))
         const all = await this.getAll()
         return all.filter((c) => !excluded.has(Number(c.id)))
     }
 
     async getIncl(includeIds = []) {
-        const included = new Set((includeIds ?? []).map((id) => Number(id)))
+        const included = new Set((includeIds ?? []).map(Number))
         const all = await this.getAll()
         return all.filter((c) => included.has(Number(c.id)))
     }
@@ -142,8 +157,8 @@ class Category {
     async getByNot(fieldName, value = this[fieldName]) {
         if (value === undefined || value === null || value === "") return await this.getAll()
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        const values = toList(value)
+        const normalized = new Set(values.map(String))
 
         return all.filter((item) => {
             const v = item[fieldName]
@@ -151,6 +166,44 @@ class Category {
             if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
             return !normalized.includes(String(v))
         })
+    }
+
+    async getBy(fieldName, value = this[fieldName]) {
+        if (value === undefined || value === null || value === "") return []
+        const all = await this.getAll()
+        const values = toList(value)
+        const normalized = new Set(values.map(String))
+
+        return all.filter((item) => {
+            const v = item[fieldName]
+            if (v === undefined || v === null) return false
+            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+            return normalized.has(String(v))
+        })
+    }
+
+    async getByApi(fieldName, value = this[fieldName]) {
+        const values = toList(value)
+        const normalized = values.map(String).map((v) => v.trim()).filter((s) => s !== "")
+
+        if (normalized.length === 0) return []
+
+        const filter = `&filter[${fieldName}]=[${normalized.join("|")}]`
+        const xml = await api.get(`${this.endpoint}?display=full${filter}`)
+        const categories = toJSONList(xml)
+        return categories.map((c) => Category.fromData(c))
+    }
+
+    async getByNotApi(fieldName, value = this[fieldName]) {
+        const values = toList(value)
+        const normalized = values.map(String).map((v) => v.trim()).filter((s) => s !== "")
+
+        if (normalized.length === 0) return []
+
+        const filter = `&filter[${fieldName}]=![${normalized.join("|")}]`
+        const xml = await api.get(`${this.endpoint}?display=full${filter}`)
+        const categories = toJSONList(xml)
+        return categories.map((c) => Category.fromData(c))
     }
 
 }

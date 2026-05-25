@@ -101,7 +101,7 @@ class Order {
      * @param {string|Date} dateMax
      * @returns {Array<object>}
      */
-    static filterByDateRange(orders = [], dateMin, dateMax) {
+    static filterByDateRange(orders, dateMin = null, dateMax = null) {
         if (!Array.isArray(orders) || orders.length === 0) return []
         if (!dateMin && !dateMax) return orders
 
@@ -174,13 +174,17 @@ class Order {
         // client-side filter: fetch all and filter locally
         if (value === undefined || value === null || value === "") return []
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
+        const valuesStr = values.map(String)
+        const normalized = new Set(valuesStr)
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return false
-            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.includes(iv))
-            return normalized.includes(String(v))
+            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+            return normalized.has(String(v))
         })
     }
 
@@ -188,15 +192,19 @@ class Order {
         // client-side inverse filter: fetch all and exclude matching items
         if (value === undefined || value === null || value === "") return await this.getAll()
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
+        const valuesStr = values.map(String)
+        const normalized = new Set(valuesStr)
 
         return all.filter((item) => {
             const v = item[fieldName]
             // if the item has no such field, keep it (it's not matching)
             if (v === undefined || v === null) return true
-            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
-            return !normalized.includes(String(v))
+            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.has(iv))
+            return !normalized.has(String(v))
         })
     }
 
@@ -215,7 +223,10 @@ class Order {
 
     // API-side inverse filter: request items where fieldName is NOT in value
     async getByNotApi(fieldName, value = this[fieldName]) {
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
         const normalized = values.map((v) => String(v).trim()).filter((s) => s !== "")
 
         if (normalized.length === 0) return []
@@ -245,6 +256,15 @@ class Order {
 
     async getAll() {
         const xml = await api.get(`${this.endpoint}?display=full`)
+        const orders = toJSONList(xml)
+
+        return orders.map((orderData) => Order.fromData(orderData))
+    }
+
+    async getAllApi(excludeIds = []) {
+        const ids = (excludeIds ?? []).map(Number).filter(Number.isFinite)
+        const filter = ids.length > 0 ? `&filter[id]=![${ids.join("|")}]` : ""
+        const xml = await api.get(`${this.endpoint}?display=full${filter}`)
         const orders = toJSONList(xml)
 
         return orders.map((orderData) => Order.fromData(orderData))

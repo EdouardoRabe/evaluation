@@ -129,13 +129,13 @@ class Cart {
 	}
 
 	async getExcl(excludeIds = []) {
-		const excluded = new Set((excludeIds ?? []).map((id) => Number(id)))
+		const excluded = new Set((excludeIds ?? []).map(Number))
 		const all = await this.getAll()
 		return all.filter((c) => !excluded.has(Number(c.id)))
 	}
 
 	async getIncl(includeIds = []) {
-		const included = new Set((includeIds ?? []).map((id) => Number(id)))
+		const included = new Set((includeIds ?? []).map(Number))
 		const all = await this.getAll()
 		return all.filter((c) => included.has(Number(c.id)))
 	}
@@ -173,14 +173,17 @@ class Cart {
 	async getBy(fieldName, value = this[fieldName]) {
 		if (value === undefined || value === null || value === "") return []
 		const all = await this.getAll()
-		const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-		const normalized = values.map((v) => String(v))
+		let values
+		if (Array.isArray(value)) values = value
+		else if (value instanceof Set) values = Array.from(value)
+		else values = [value]
+		const normalized = new Set(values.map(String))
 
 		return all.filter((item) => {
 			const v = item[fieldName]
 			if (v === undefined || v === null) return false
-			if (Array.isArray(v)) return v.map(String).some((iv) => normalized.includes(iv))
-			return normalized.includes(String(v))
+			if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+			return normalized.has(String(v))
 		})
 	}
 
@@ -201,16 +204,19 @@ class Cart {
         // client-side inverse filter: fetch all and exclude matching items
         if (value === undefined || value === null || value === "") return await this.getAll()
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+		let values
+		if (Array.isArray(value)) values = value
+		else if (value instanceof Set) values = Array.from(value)
+		else values = [value]
+		const normalized = new Set(values.map(String))
 
-        return all.filter((item) => {
-            const v = item[fieldName]
-            // if the item has no such field, keep it (it's not matching)
-            if (v === undefined || v === null) return true
-            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
-            return !normalized.includes(String(v))
-        })
+		return all.filter((item) => {
+			const v = item[fieldName]
+			// if the item has no such field, keep it (it's not matching)
+			if (v === undefined || v === null) return true
+			if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.has(iv))
+			return !normalized.has(String(v))
+		})
     }
 }
 

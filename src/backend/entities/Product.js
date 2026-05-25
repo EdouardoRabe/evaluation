@@ -7,6 +7,12 @@ import Combination from "./Combination"
 import StockAvailable from "./StockAvailable"
 import Category from "./Category"
 
+const toList = (value) => {
+	if (Array.isArray(value)) return value
+	if (value instanceof Set) return Array.from(value)
+	return [value]
+}
+
 const buildImageUrl = (productId, imageId) => {
 	const baseUrl = import.meta.env.VITE_PRESTASHOP_BACKEND_URL || ""
 	const apiKey = import.meta.env.VITE_PRESTASHOP_API_KEY
@@ -194,34 +200,56 @@ class Product {
 		return products.map((productData) => Product.fromData(productData))
 	}
 
+	async getAllApi(excludeIds = []) {
+		const ids = (excludeIds ?? []).map(Number).filter(Number.isFinite)
+		const filter = ids.length > 0 ? `&filter[id]=![${ids.join("|")}]` : ""
+		const xml = await api.get(`${this.endpoint}?display=full${filter}`)
+		const products = toJSONList(xml)
+		return products.map((productData) => Product.fromData(productData))
+	}
+
 	async getByCategory(categoryId) {
 		const xml = await api.get(`${this.endpoint}?filter[id_category_default]=[${categoryId}]&display=full`)
 		const products = toJSONList(xml)
 		return products.map((productData) => Product.fromData(productData))
 	}
 
+	async getBy(fieldName, value = this[fieldName]) {
+		if (value === undefined || value === null || value === "") return []
+		const all = await this.getAll()
+		const values = toList(value)
+		const normalized = new Set(values.map(String))
+
+		return all.filter((item) => {
+			const v = item[fieldName]
+			if (v === undefined || v === null) return false
+			if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+			return normalized.has(String(v))
+		})
+	}
+
 	async getByNot(fieldName, value = this[fieldName]) {
 		if (value === undefined || value === null || value === "") return await this.getAll()
 		const all = await this.getAll()
-		const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-		const normalized = values.map((v) => String(v))
+		const values = toList(value)
+		const normalized = new Set(values.map(String))
 
 		return all.filter((item) => {
 			const v = item[fieldName]
 			if (v === undefined || v === null) return true
-			if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
-			return !normalized.includes(String(v))
+			if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.has(iv))
+			return !normalized.has(String(v))
 		})
 	}
 
 	async getExcl(excludeIds = []) {
-		const excluded = new Set((excludeIds ?? []).map((id) => Number(id)))
+		const excluded = new Set((excludeIds ?? []).map(Number))
 		const all = await this.getAll()
 		return all.filter((p) => !excluded.has(Number(p.id)))
 	}
 
 	async getIncl(includeIds = []) {
-		const included = new Set((includeIds ?? []).map((id) => Number(id)))
+		const included = new Set((includeIds ?? []).map(Number))
 		const all = await this.getAll()
 		return all.filter((p) => included.has(Number(p.id)))
 	}
@@ -258,12 +286,7 @@ class Product {
 
     // filtre côté API prestashop
     async getAllFiltered(excludeIds = []) {
-        const ids = (excludeIds ?? []).map((id) => Number(id)).filter((id) => Number.isFinite(id))
-        const filter = ids.length > 0 ? `&filter[id]=![${ids.join("|")}]` : ""
-        const xml = await api.get(`${this.endpoint}?display=full${filter}`)
-        const products = toJSONList(xml)
-
-        return products.map((productData) => Product.fromData(productData))
+		return await this.getAllApi(excludeIds)
     }
 
     async getTax() {
@@ -281,7 +304,7 @@ class Product {
 		const taxRate = await this.getTax();
 		const price = Number(this.price);
 		if (!Number.isFinite(price)) {
-			return NaN;
+			return Number.NaN;
 		}
 		const safeRate = Number.isFinite(Number(taxRate)) ? Number(taxRate) : 0;
 		return price * (1 + safeRate / 100);
@@ -499,13 +522,12 @@ class Product {
 		const xml = await api.get(`${this.endpoint}?display=full${filter}`)
 		const orders = toJSONList(xml)
 
-		return orders.map((orderData) => Order.fromData(orderData))
+		return orders.map((productData) => Product.fromData(productData))
 	}
 
 	// API-side inverse filter: request items where fieldName is NOT in value
 	async getByNotApi(fieldName, value = this[fieldName]) {
-		const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-		const normalized = values.map((v) => String(v).trim()).filter((s) => s !== "")
+		const normalized = toList(value).map(String).map((v) => v.trim()).filter((s) => s !== "")
 
 		if (normalized.length === 0) return []
 

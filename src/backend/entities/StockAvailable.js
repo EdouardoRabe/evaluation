@@ -113,27 +113,33 @@ class StockAvailable {
     async getBy(fieldName, value = this[fieldName]) {
         if (value === undefined || value === null || value === "") return []
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
+        const normalized = new Set(values.map(String))
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return false
-            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.includes(iv))
-            return normalized.includes(String(v))
+            if (Array.isArray(v)) return v.map(String).some((iv) => normalized.has(iv))
+            return normalized.has(String(v))
         })
     }
 
     async getByNot(fieldName, value = this[fieldName]) {
         if (value === undefined || value === null || value === "") return await this.getAll()
         const all = await this.getAll()
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
-        const normalized = values.map((v) => String(v))
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
+        const normalized = new Set(values.map(String))
 
         return all.filter((item) => {
             const v = item[fieldName]
             if (v === undefined || v === null) return true
-            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.includes(iv))
-            return !normalized.includes(String(v))
+            if (Array.isArray(v)) return !v.map(String).some((iv) => normalized.has(iv))
+            return !normalized.has(String(v))
         })
     }
 
@@ -151,7 +157,10 @@ class StockAvailable {
     }
 
     async getByNotApi(fieldName, value = this[fieldName]) {
-        const values = Array.isArray(value) ? value : value instanceof Set ? Array.from(value) : [value]
+        let values
+        if (Array.isArray(value)) values = value
+        else if (value instanceof Set) values = Array.from(value)
+        else values = [value]
         const normalized = values.map((v) => String(v).trim()).filter((s) => s !== "")
 
         if (normalized.length === 0) return []
@@ -198,6 +207,10 @@ class StockAvailable {
         const stockAvailables = toJSONList(xml)
 
         return stockAvailables.map((a) => StockAvailable.fromData(a))
+    }
+
+    async getAllApi(excludeIds = []) {
+        return await this.getAllFiltered(excludeIds)
     }
 
     async getExcl(excludeIds = []) {
