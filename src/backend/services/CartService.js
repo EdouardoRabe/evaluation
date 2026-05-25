@@ -160,6 +160,11 @@ const duplicateCart = async(cart, multiplicateur, dateUpdate) => {
 
     for (const row of cart.cartRows) {
         row.quantity = Number(row.quantity) * multiplicateur
+        // Possible aleas
+        // const checkQuantity = await getStockForProductAttribute(row.productId, row.productAttributeId);
+        // if (row.quantity > checkQuantity) {
+        //     row.quantity = checkQuantity
+        // }
         duplicatedCart = await addProductToCart(cart.customerId, row.productId, row.productAttributeId, row.quantity)
     }
 
