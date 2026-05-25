@@ -299,15 +299,15 @@ const duplicateCart = async (orderId, multiplicateur, dateUpdate) => {
         const order = await orderClass.getById(Number(orderId))
         let cart = null
 
-        if (order && order.cartId) {
+        if (order?.cartId) {
             const cartClass = new Cart({}, false)
             cart = await cartClass.getById(Number(order.cartId))
         }
 
-        CartService.duplicateCart(cart, multiplicateur, dateUpdate);
+        const duplicatedCart = await CartService.duplicateCart(cart, multiplicateur, dateUpdate)
 
         console.log("aaaaaaaaaaaaa", cart, " a la date ", dateUpdate, " avec multiplicateur ", multiplicateur, " et orderId ", orderId);
-        return { success: !!cart, cart, orderId: Number(orderId) }
+        return { success: !!cart, cart: duplicatedCart || cart, sourceCart: cart, orderId: Number(orderId) }
     } catch (err) {
         console.error("Failed in duplicateCart:", err)
         throw err

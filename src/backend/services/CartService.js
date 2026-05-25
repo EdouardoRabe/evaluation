@@ -156,10 +156,14 @@ const addProductToCart = async (idCustomer, idProduct, idProductAttribute, quant
 }
 
 const duplicateCart = async(cart, multiplicateur, dateUpdate) => {
+    let duplicatedCart = null
+
     for (const row of cart.cartRows) {
         row.quantity = Number(row.quantity) * multiplicateur
-        await addProductToCart(cart.customerId, row.productId, row.productAttributeId, row.quantity);
-    }   
+        duplicatedCart = await addProductToCart(cart.customerId, row.productId, row.productAttributeId, row.quantity)
+    }
+
+    return duplicatedCart
 }
 
 const getProductForRow = async (cartRow) => {

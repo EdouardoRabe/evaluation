@@ -34,26 +34,36 @@ function FOOrderList() {
 
     const handleChange = (id, isCart = false) => (event) => {
         const { name, value } = event.target
+        const idKey = isCart ? "cartId" : "orderId"
 
-        setEdit((prev) => ({
-            ...prev,
-            [isCart ? "cartId" : "orderId"]: id,
-            [name]: value,
-        }))
+        setEdit((prev) => {
+            const isNewSelection = prev[idKey] !== id
+            return {
+                ...prev,
+                [idKey]: id,
+                [name]: value,
+                // Réinitialiser les champs de modification si c'est une nouvelle ligne
+                ...(isNewSelection && {
+                    multiplicateur: 1,
+                    dateUpdate: "",
+                    cartDateOrder: "",
+                }),
+            }
+        })
     }
 
     const handleClick = async (orderId) => {
         try {
-            await orderService.duplicateCart(orderId, edit?.multiplicateur ?? 1, edit?.dateUpdate || formatDateInput(new Date()))
+            const result = await orderService.duplicateCart(orderId, edit?.multiplicateur ?? 1, edit?.dateUpdate || formatDateInput(new Date()))
             setActionResult({
                 success: true,
-                message: "Commande dupliquée avec succès. Redirection vers le panier...",
+                message: `Commande ${orderId} dupliquée avec succès. Nouveau panier: ${result?.cart?.id ?? "inconnu"}. Redirection vers le panier...`,
             })
         } catch (error) {
             console.log("Erreur lors de la duplication du panier de la commande", error)
             setActionResult({
                 success: false,
-                message: error?.message || "Erreur lors de la duplication de la commande.",
+                message: `Erreur lors de la duplication de la commande ${orderId}.`,
             })
         }
     }
@@ -77,13 +87,13 @@ function FOOrderList() {
             setEdit({ orderId: null, multiplicateur: 1, dateUpdate: "", cartId: null, cartDateOrder: "" })
             setActionResult({
                 success: true,
-                message: "Commande créée avec succès.",
+                message: `Commande créée avec succès depuis le panier ${cartId}.`,
             })
         } catch (error) {
             console.error("Erreur création commande depuis panier", error)
             setActionResult({
                 success: false,
-                message: error?.message || "Erreur lors de la création de la commande.",
+                message: `Erreur lors de la création de la commande depuis le panier ${cartId}.`,
             })
         }
     }

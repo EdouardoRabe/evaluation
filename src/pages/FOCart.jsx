@@ -310,7 +310,10 @@ function FOCart() {
 
     return (
         <div className="fo-cart">
-            <h1 className="fo-cart__title">Votre Panier</h1>
+            <div className="fo-cart__header-top">
+                <h1 className="fo-cart__title">Votre Panier</h1>
+                {cart?.id && <span className="fo-cart__cart-id">ID: {cart.id}</span>}
+            </div>
 
             {actionResult ? (
                 <div className={`fo-cart__message fo-cart__message--${actionResult.success ? "success" : "error"}`}>
