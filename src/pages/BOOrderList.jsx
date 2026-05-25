@@ -1,17 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import orderService from "../backend/services/OderService"
 import BOOrderRow from "../components/BOOrderRow";
-import { formatDateInput } from "../backend/utils/utils"
+import { formatDateInput, isDateInRange } from "../backend/utils/utils"
 
 function BOOrderList() {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [actionResult, setActionResult] = useState(null);
+    const [minDate, setMinDate] = useState("");
+    const [maxDate, setMaxDate] = useState("");
     const [edit, setEdit] = useState({
         orderId: null,
         orderStateId: "",
         dateUpdate: "",
     });
+
+    const filteredOrders = useMemo(() => {
+        const min = minDate ? new Date(minDate) : null;
+        const max = maxDate ? new Date(maxDate) : null;
+
+        return orders.filter((order) => {
+            const orderDate = new Date(order?.dateAdd || order?.dateUpd || null);
+            return isDateInRange(orderDate, min, max);
+        });
+    }, [orders, minDate, maxDate]);
 
     const handleChange = (orderId) => (e) => {
         const { name, value } = e.target;
@@ -69,6 +81,24 @@ function BOOrderList() {
     return(
         <>
             <h1>Liste de tous les commandes</h1>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
+                <label>
+                    Date min :{" "}
+                    <input
+                        type="date"
+                        value={minDate}
+                        onChange={(e) => setMinDate(e.target.value)}
+                    />
+                </label>
+                <label>
+                    Date max :{" "}
+                    <input
+                        type="date"
+                        value={maxDate}
+                        onChange={(e) => setMaxDate(e.target.value)}
+                    />
+                </label>
+            </div>
             {actionResult && (
                 <div style={{ marginBottom: "20px", padding: "10px", border: "1px solid", backgroundColor: actionResult.success ? "#d4edda" : "#f8d7da", color: actionResult.success ? "#155724" : "#721c24" }}>
                     {actionResult.success ? (
@@ -81,7 +111,7 @@ function BOOrderList() {
             {isLoading ? (<p>Chargements des clients</p>) : (
                 <BOOrderRow
                     title="Commandes"
-                    rows={orders}
+                    rows={filteredOrders}
                     edit={edit}
                     onChange={handleChange}
                     onClick={handleClick}

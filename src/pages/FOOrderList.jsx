@@ -3,7 +3,7 @@ import orderService from "../backend/services/OderService"
 import cartService from "../backend/services/CartService.js"
 import FOOrderRow from "../components/FOOrderRow"
 import useLocalStorage from "../hooks/useLocalStorage.jsx"
-import { formatDateInput } from "../backend/utils/utils.js"
+import { formatDateInput, isDateInRange } from "../backend/utils/utils.js"
 
 const getOrdersByCustomer = async (customerId) => {
     return await orderService.getOrderRowsByCustomer(customerId)
@@ -19,6 +19,8 @@ function FOOrderList() {
     const [carts, setCarts] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [user] = useLocalStorage("user", null)
+    const [minDate, setMinDate] = useState("")
+    const [maxDate, setMaxDate] = useState("")
     const [edit, setEdit] = useState({
         orderId: null,
         cartId: null,
@@ -101,16 +103,55 @@ function FOOrderList() {
         [carts, user],
     )
 
+    const filteredOrders = useMemo(() => {
+        const min = minDate ? new Date(minDate) : null
+        const max = maxDate ? new Date(maxDate) : null
+
+        return (orders || []).filter((order) => {
+            const orderDate = new Date(order?.dateAdd || order?.dateUpd || null)
+            return isDateInRange(orderDate, min, max)
+        })
+    }, [orders, minDate, maxDate])
+
+    const filteredCartRows = useMemo(() => {
+        const min = minDate ? new Date(minDate) : null
+        const max = maxDate ? new Date(maxDate) : null
+
+        return cartRows.filter((cart) => {
+            const cartDate = new Date(cart?.dateAdd || cart?.dateUpd || null)
+            return isDateInRange(cartDate, min, max)
+        })
+    }, [cartRows, minDate, maxDate])
+
     return (
         <>
             <h1>Liste de tous les commandes</h1>
+
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
+                <label>
+                    Date min :{" "}
+                    <input
+                        type="date"
+                        value={minDate}
+                        onChange={(e) => setMinDate(e.target.value)}
+                    />
+                </label>
+                <label>
+                    Date max :{" "}
+                    <input
+                        type="date"
+                        value={maxDate}
+                        onChange={(e) => setMaxDate(e.target.value)}
+                    />
+                </label>
+            </div>
 
             {isLoading ? (
                 <p>Chargements des clients</p>
             ) : (
                 <FOOrderRow
                     title="Commandes"
-                    rows={orders}
+                    rows={filteredOrders}
                     edit={edit}
                     multiplicateur={1}
                     onChange={handleChange}
@@ -126,7 +167,7 @@ function FOOrderList() {
             ) : (
                 <FOOrderRow
                     title="Paniers"
-                    rows={cartRows}
+                    rows={filteredCartRows}
                     edit={edit}
                     onChange={handleChange}
                     onClick={handleCommanderClick}
