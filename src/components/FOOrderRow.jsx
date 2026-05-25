@@ -9,8 +9,8 @@ function OrderActionCell({ cell, table }) {
     const meta = table?.options?.meta ?? {}
     const row = cell.row
     const rowId = Number(row.original?.id ?? 0)
-    const edit = meta.editRef?.current ?? null
-    const actionMode = meta.actionModeRef?.current ?? "order"
+    const edit = meta.edit ?? null
+    const actionMode = meta.actionMode ?? "order"
     const isCartMode = actionMode === "cart"
     const isSelected = isCartMode ? Number(edit?.cartId ?? 0) === rowId : Number(edit?.orderId ?? 0) === rowId
     const baseDate = formatDateInput(row.original?.dateAdd)
@@ -35,11 +35,12 @@ function OrderActionCell({ cell, table }) {
     }
 
     const dateValue = isSelected ? (edit?.dateUpdate || baseDate) : baseDate
-    const multiplicateur = meta.multiplicateurRef?.current ?? 1
+    const multiplicateur = meta.multiplicateur ?? 1
     const multiplicateurValue = isSelected ? (edit?.multiplicateur ?? multiplicateur) : multiplicateur
 
     const handleMultiplicateurChange = (type) => {
-        const newValue = type === "minus" ? Math.max(1, multiplicateurValue - 1) : multiplicateurValue + 1
+        const currentValue = Math.max(1, Number(multiplicateurValue) || 1)
+        const newValue = type === "minus" ? Math.max(1, currentValue - 1) : currentValue + 1
         const event = {
             target: {
                 name: "multiplicateur",
@@ -62,10 +63,12 @@ function OrderActionCell({ cell, table }) {
                     −
                 </button>
                 <input
-                    type="text"
+                    type="number"
                     className="fo-order-row__quantity-input"
                     value={multiplicateurValue}
-                    readOnly
+                    min={1}
+                    step={1}
+                    onChange={meta.onChangeRef?.current?.(rowId, false)}
                     aria-label="Multiplicateur"
                 />
                 <button
@@ -129,13 +132,16 @@ function FOOderRow({
 
     const tableMeta = useMemo(
         () => ({
+            edit,
+            actionMode,
+            multiplicateur,
             editRef,
             onChangeRef,
             onClickRef,
             actionModeRef,
             multiplicateurRef,
         }),
-        [],
+        [actionMode, edit, multiplicateur],
     )
 
     const columns = useMemo(
