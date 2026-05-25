@@ -12,6 +12,7 @@ import FOGuestCheckout from "../pages/FOGuestCheckout.jsx";
 import BOStock from "../pages/BOStock.jsx";
 import BOLogin from "../pages/BOLogin.jsx";
 import FOCart from "../pages/FOCart.jsx";
+import All from "../pages/All.jsx";
 
 import BOStatistic from "../pages/BOStatistic.jsx";
 import BODashboard from "../pages/BODashboard.jsx";
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
             {
                 path: "dashboard",
                 element: <BODashboard/>
+            },
+            {
+                path: "all",
+                element: <All/>
             }
         ]
     },
