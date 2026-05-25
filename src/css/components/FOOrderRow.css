@@ -68,7 +68,7 @@
 /* Quantity Control Styles */
 .fo-order-row__quantity-control {
     display: inline-grid;
-    grid-template-columns: 34px 46px 34px;
+    grid-template-columns: 34px 160px 34px;
     align-items: center;
     border: 1px solid #d9d9d9;
     border-radius: 6px;
@@ -110,9 +110,9 @@
 }
 
 .fo-order-row__quantity-input {
-    width: 46px;
+    width: 160px;
     height: 34px;
-    min-width: 46px;
+    min-width: 160px;
     border: none;
     background: #ffffff;
     text-align: center;
@@ -136,5 +136,6 @@
 }
 
 .fo-order-row__quantity-input[type=number] {
+    appearance: textfield;
     -moz-appearance: textfield;
 }
