@@ -195,7 +195,7 @@ function FOOrderList() {
                     title="Commandes"
                     rows={filteredOrders}
                     edit={edit}
-                    multiplicateur={1}
+                    multiplicateur={edit?.multiplicateur ?? 1}
                     onChange={handleChange}
                     onClick={handleClick}
                     actionMode="order"

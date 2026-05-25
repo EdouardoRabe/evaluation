@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react"
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table"
 import { formatDateInput, formatDateTime } from "../backend/utils/utils"
+import "../css/components/FOOrderRow.css"
 
 const noopValidator = () => null
 
