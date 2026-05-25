@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table"
 import { formatDateInput, formatDateTime } from "../backend/utils/utils"
 import "../css/components/FOOrderRow.css"
+import OrderWithDetails from "../backend/dto/OrderWithDetails.js"
 
 const noopValidator = () => null
 
@@ -174,6 +175,40 @@ function FOOderRow({
         [actionMode, edit, multiplicateur],
     )
 
+    // Toggle this to false or comment out to disable order details fetch/display
+    const ENABLE_ORDER_DETAILS = true
+
+    const [detailsMap, setDetailsMap] = useState(() => new Map())
+    const [loadingDetails, setLoadingDetails] = useState(() => new Set())
+
+    const fetchOrderDetails = async (order) => {
+        if (!order?.id) return null
+        const id = Number(order.id)
+        if (detailsMap.has(id)) return detailsMap.get(id)
+        if (loadingDetails.has(id)) return null
+
+        // mark loading
+        setLoadingDetails((prev) => new Set(prev).add(id))
+        try {
+            const dto = await OrderWithDetails.fromOrder(order)
+            setDetailsMap((prev) => {
+                const next = new Map(prev)
+                next.set(id, dto)
+                return next
+            })
+            return dto
+        } catch (err) {
+            console.error("Error loading order details for", id, err)
+            return null
+        } finally {
+            setLoadingDetails((prev) => {
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+            })
+        }
+    }
+
     const columns = useMemo(
         () => [
             {
@@ -211,6 +246,28 @@ function FOOderRow({
         columns,
         data: safeRows,
         meta: tableMeta,
+        enableRowDetail: ENABLE_ORDER_DETAILS,
+        renderDetailPanel: ({ row }) => {
+            if (!ENABLE_ORDER_DETAILS) return null
+
+            const order = row.original
+            const dto = detailsMap.get(Number(order?.id))
+            if (!dto) {
+                // trigger fetch if not loaded
+                fetchOrderDetails(order).catch(() => {})
+                return (
+                    <div style={{ padding: 12 }}>
+                        Chargement des détails...
+                    </div>
+                )
+            }
+
+            return (
+                <div style={{ padding: 12 }}>
+                    <OrderDetailsSubrow orderWithDetails={dto} />
+                </div>
+            )
+        },
         enablePagination: true,
         initialState: {
             pagination: { pageIndex: 0, pageSize: 10 },
@@ -227,6 +284,40 @@ function FOOderRow({
             {title ? <h3 className="fo-order-row__title">{title}</h3> : null}
             <MaterialReactTable table={table} />
         </section>
+    )
+}
+
+
+function OrderDetailsSubrow({ orderWithDetails }) {
+    const rows = orderWithDetails?.orderDetails || []
+
+    if (!rows || rows.length === 0) {
+        return <div>Aucun détail</div>
+    }
+
+    return (
+        <div className="fo-order-details-subrow">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr style={{ backgroundColor: '#f1f1f1' }}>
+                        <th style={{ padding: 8, textAlign: 'left' }}>Produit</th>
+                        <th style={{ padding: 8, textAlign: 'right' }}>Qté</th>
+                        <th style={{ padding: 8, textAlign: 'right' }}>Prix Unitaire</th>
+                        <th style={{ padding: 8, textAlign: 'right' }}>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((d) => (
+                        <tr key={d.id}>
+                            <td style={{ padding: 8 }}>{d.productName || d.productReference || `#${d.productId}`}</td>
+                            <td style={{ padding: 8, textAlign: 'right' }}>{d.productQuantity ?? d.quantity ?? 0}</td>
+                            <td style={{ padding: 8, textAlign: 'right' }}>{Number(d.unitPrice ?? d.unitPriceTaxIncl ?? d.unitPriceTaxExcl ?? 0).toFixed(2)}€</td>
+                            <td style={{ padding: 8, textAlign: 'right' }}>{Number(d.totalPriceTaxIncl ?? d.totalPriceTaxExcl ?? 0).toFixed(2)}€</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     )
 }
 
@@ -252,3 +343,7 @@ FOOderRow.propTypes = {
 }
 
 export default FOOderRow
+
+OrderDetailsSubrow.propTypes = {
+    orderWithDetails: noopValidator,
+}

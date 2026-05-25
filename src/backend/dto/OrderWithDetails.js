@@ -1,4 +1,10 @@
-import { toDate, buildMapById, isDateInRange } from "../utils/utils.js";
+import { toDate, isDateInRange } from "../utils/utils.js";
+
+const ensureArray = (v) => {
+    if (Array.isArray(v)) return v
+    if (v) return [v]
+    return []
+}
 
 export default class OrderWithDetails {
     /**
@@ -10,6 +16,25 @@ export default class OrderWithDetails {
     constructor(order = null, orderDetails = []) {
         this.order = order
         this.orderDetails = orderDetails
+    }
+
+    /**
+     * Crée un OrderWithDetails à partir d'une seule commande en chargeant ses lignes.
+     * Méthode utilitaire pour un chargement lazy d'une commande.
+     * @param {object} order
+     * @returns {Promise<OrderWithDetails>}
+     */
+    static async fromOrder(order) {
+        if (!order || !order.id) return new OrderWithDetails(order, [])
+
+        // importer dynamiquement OrderDetail pour éviter dépendances circulaires
+        const OrderDetail = (await import("../entities/OrderDetail.js")).default
+        const detailClass = new OrderDetail({}, false)
+        const rawDetails = await detailClass.getBy("orderId", order.id)
+
+        const details = ensureArray(rawDetails)
+
+        return new OrderWithDetails(order, details)
     }
 
     /**
@@ -54,14 +79,15 @@ export default class OrderWithDetails {
      * @param {string|Date} dateMax
      * @returns {Array<OrderWithDetails>}
      */
-    static filterGroupsByDate(list = [], dateMin, dateMax) {
-        if (!Array.isArray(list) || list.length === 0) return []
-        if (!dateMin && !dateMax) return list
+    static filterGroupsByDate(list, dateMin = null, dateMax = null) {
+        const src = Array.isArray(list) ? list : []
+        if (src.length === 0) return []
+        if (!dateMin && !dateMax) return src
 
         const minDate = toDate(dateMin ?? "")
         const maxDate = toDate(dateMax ?? "")
 
-        return list.filter((item) =>
+        return src.filter((item) =>
             isDateInRange(toDate(item?.order?.dateAdd ?? ""), minDate, maxDate)
         )
     }
