@@ -3,11 +3,11 @@ import { useEffect, useState, useMemo } from "react";
 import Product from "../backend/entities/Product.js";
 import Category from "../backend/entities/Category.js";
 import { filterProducts } from "../backend/services/ProductService.js";
+import "../css/pages/FOProductList.css";
 
 function FOProductList() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [, setIsLoading] = useState(true);
     const [imageUrls, setImageUrls] = useState({});
     const [badges, setBadges] = useState({});
 
@@ -17,6 +17,10 @@ function FOProductList() {
     const [categoryId, setCategoryId] = useState("");
     const [name, setName] = useState("");
 
+    // pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 12; // 3 lignes × 4 colonnes
+
     const navigate = useNavigate();
 
     const handlePreview = (productId) => {
@@ -25,7 +29,6 @@ function FOProductList() {
 
     useEffect(() => {
         const loadProducts = async () => {
-            setIsLoading(true);
             try {
                 const product = new Product({}, false);
                 const productList = await product.getAll();
@@ -58,10 +61,8 @@ function FOProductList() {
                 setProducts(enrichedProducts);
                 setImageUrls(nextImageUrls);
                 setBadges(nextBadges);
-                setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching products:", error);
-                setIsLoading(false);
             }
         };
 
@@ -104,19 +105,33 @@ function FOProductList() {
         return categories.filter((category) => String(category?.name ?? "").trim() !== "");
     }, [categories]);
 
+    // Pagination logic
+    const paginatedProducts = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return filteredProducts.slice(startIndex, endIndex);
+    }, [filteredProducts, currentPage]);
+
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     return (
-        <div>
+        <div className="fo-product-list">
             <h1>Product List</h1>
 
-            <div>
-                <label>Name : </label>
-                <input placeholder="Search name" value={name} onChange={(e) => setName(e.target.value)} />
-                <label>Min price : </label>
-                <input placeholder="Min price" type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min={0} />
-                <label>Max price : </label>
-                <input placeholder="Max price" type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min={0} />
-                <label>Category : </label>
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <div className="fo-product-list__filters">
+                <label htmlFor="filter-name">Name : </label>
+                <input id="filter-name" placeholder="Search name" value={name} onChange={(e) => setName(e.target.value)} />
+                <label htmlFor="filter-min-price">Min price : </label>
+                <input id="filter-min-price" placeholder="Min price" type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min={0} />
+                <label htmlFor="filter-max-price">Max price : </label>
+                <input id="filter-max-price" placeholder="Max price" type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min={0} />
+                <label htmlFor="filter-category">Category : </label>
+                <select id="filter-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
                     <option value="">All Categories</option>
                     {selectableCategories.map((category, index) => (
                         <option key={`${category.id}-${index}`} value={category.id}>
@@ -126,53 +141,85 @@ function FOProductList() {
                 </select>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Reference</th>
-                        <th>Price</th>
-                        <th>Category</th>
-                        <th>Stock total</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+            <div className="fo-product-list__grid">
+                {paginatedProducts.map((product, index) => (
+                    <button 
+                        key={`${product.id}-${index}`}
+                        className="fo-product-card"
+                        onClick={() => handlePreview(product.id)}
+                        type="button"
+                        aria-label={`View ${product.name?.[0]?.value}`}
+                    >
+                        <div className="fo-product-card__image-wrapper">
+                            {imageUrls[product.id] ? (
+                                <img 
+                                    src={imageUrls[product.id]} 
+                                    alt={product.name?.[0]?.value}
+                                    className="fo-product-card__image"
+                                />
+                            ) : (
+                                <div className="fo-product-card__no-image">No image</div>
+                            )}
+                            
+                            {badges[product.id] && (
+                                <div 
+                                    className="fo-product-card__badge"
+                                    style={{ backgroundColor: badges[product.id].color || "#dd0000" }}
+                                >
+                                    {badges[product.id].label}
+                                </div>
+                            )}
+                        </div>
 
-                <tbody>
-                    {filteredProducts.map((product, index) => (
-                        <tr key={`${product.id}-${index}`}>
-                            <td>
-                                {imageUrls[product.id] ? (
-                                    <img src={imageUrls[product.id]} alt="product" width="80" />
-                                ) : (
-                                    "no image"
-                                )}
-                            </td>
-
-                            <td>
+                        <div className="fo-product-card__content">
+                            <h3 className="fo-product-card__name">
                                 {product.name?.[0]?.value}
-                                {badges[product.id] ? (
-                                    <span style={{ color: badges[product.id].color }}>
-                                        {` (${badges[product.id].label})`}
-                                    </span>
-                                ) : null}
-                            </td>
+                            </h3>
+                            
+                            <p className="fo-product-card__reference">
+                                {product.reference}
+                            </p>
 
-                            <td>{product.reference}</td>
-                            <td>{Number(product.priceTtc ?? product.price).toFixed(2)}</td>
-                            <td>{product.categoryName || "-"}</td>
-                            <td>{product.quantity}</td>
+                            <div className="fo-product-card__details">
+                                <span className="fo-product-card__price">
+                                    {Number(product.priceTtc ?? product.price).toFixed(2)}€
+                                </span>
+                                <span className="fo-product-card__stock">
+                                    Stock: {product.quantity}
+                                </span>
+                            </div>
 
-                            <td>
-                                <button onClick={() => handlePreview(product.id)}>
-                                    Aperçu
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            <p className="fo-product-card__category">
+                                {product.categoryName || "—"}
+                            </p>
+                        </div>
+                    </button>
+                ))}
+            </div>
+
+            {totalPages > 1 && (
+                <div className="fo-product-list__pagination">
+                    <button 
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="fo-product-list__pagination-btn"
+                    >
+                        ← Précédent
+                    </button>
+
+                    <div className="fo-product-list__pagination-info">
+                        Page {currentPage} sur {totalPages}
+                    </div>
+
+                    <button 
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="fo-product-list__pagination-btn"
+                    >
+                        Suivant →
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
