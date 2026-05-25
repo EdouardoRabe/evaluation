@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 import CartService from "../backend/services/CartService.js";
 import Cart from "../backend/entities/Cart.js";
 import Product from "../backend/entities/Product.js";
@@ -35,6 +35,8 @@ function FOCart() {
     const [isGuest] = useLocalStorage("isGuest", false);
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const cloneCount = location.state?.cloneCount ?? 0;
 
     const totals = useMemo(() => (
         CartService.getCartTotals({
@@ -159,7 +161,7 @@ function FOCart() {
         }
 
         try {
-            await OderService.createOrderFromCart(cart, user.id, new Date(),0);
+            await OderService.createOrderFromCart(cart, user.id, new Date(), cloneCount);
             setActionResult({
                 success: true,
                 message: "Commande créée avec succès. Redirection vers vos commandes en cours..."

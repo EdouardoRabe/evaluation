@@ -24,6 +24,7 @@ function FOOrderList() {
     const [actionResult, setActionResult] = useState(null)
     const [minDate, setMinDate] = useState("")
     const [maxDate, setMaxDate] = useState("")
+    const [cloneCount, setCloneCount] = useState(0)
     const [edit, setEdit] = useState({
         orderId: null,
         cartId: null,
@@ -106,11 +107,11 @@ function FOOrderList() {
         }
 
         const timer = setTimeout(() => {
-            navigate("/fo/cart")
+            navigate("/fo/cart", { state: { cloneCount } })
         }, 2200)
 
         return () => clearTimeout(timer)
-    }, [actionResult, navigate])
+    }, [actionResult, navigate, cloneCount])
 
     useEffect(() => {
         const loadAll = async () => {
