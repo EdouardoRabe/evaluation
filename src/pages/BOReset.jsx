@@ -41,12 +41,20 @@ function BOReset() {
     }
 
     const doDelete = async () => {
+        if (selected.size === 0) {
+            setActionResult({
+                success: false,
+                message: "Sélectionne au moins une ressource avant de lancer la réinitialisation.",
+            })
+            return
+        }
+
         try {
             setActionResult(null)
             await deleteAll(selected);
             setActionResult({
                 success: true,
-                message: `Réinitialisation terminée pour ${selected.size} ressource(s).`
+                message: `Réinitialisation terminée pour ${selected.size} ressource(s).`,
             })
             setSelected(new Set())
         } catch (error) {

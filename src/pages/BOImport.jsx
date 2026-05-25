@@ -9,13 +9,27 @@ function BOImport() {
     const [imageZipFile, setImageZipFile] = useState(null)
     const [importResult, setImportResult] = useState(null)
     const [importError, setImportError] = useState(null)
+    const [importMessage, setImportMessage] = useState(null)
     const [isImporting, setIsImporting] = useState(false)
     const [skipImageImport, setSkipImageImport] = useState(false)
+
+    const buildImportSummary = (result) => {
+        const parts = []
+        if (result?.file1) parts.push("produits")
+        if (result?.file2) parts.push("déclinaisons")
+        if (result?.file3) parts.push("commandes")
+        if (result?.file4) parts.push("images")
+
+        return parts.length > 0
+            ? `Import terminé avec succès: ${parts.join(", ")}.`
+            : "Import terminé avec succès."
+    }
 
     const handleSubmit = async (event) => {
         event.preventDefault()
         setImportError(null)
         setImportResult(null)
+        setImportMessage(null)
         setIsImporting(true)
 
         try {
@@ -29,8 +43,10 @@ function BOImport() {
             })
 
             setImportResult(result)
+            setImportMessage(buildImportSummary(result))
         } catch (error) {
             setImportError(error?.message ?? 'Erreur inconnue')
+            setImportMessage("L'import a échoué.")
         } finally {
             setIsImporting(false)
         }
@@ -81,8 +97,15 @@ function BOImport() {
                 </button>
             </div>
 
-            {importError && <div className="bo-import__message bo-import__message--error">{importError}</div>}
-            {importResult && <pre className="bo-import__result">{JSON.stringify(importResult, null, 2)}</pre>}
+            {importMessage && (
+                <div className={`bo-import__message ${importError ? "bo-import__message--error" : "bo-import__message--success"}`}>
+                    <strong>{importError ? "Import impossible" : "Import réussi"}</strong>
+                    <div>{importError || importMessage}</div>
+                </div>
+            )}
+            {importResult && (
+                <pre className="bo-import__result">{JSON.stringify(importResult, null, 2)}</pre>
+            )}
         </form>
     )
 }
