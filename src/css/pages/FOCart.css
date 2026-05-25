@@ -1,0 +1,265 @@
+.fo-cart {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.fo-cart--loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    font-size: 1.1rem;
+    color: #666666;
+}
+
+.fo-cart__title {
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111111;
+}
+
+/* EMPTY STATE */
+.fo-cart__empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+}
+
+.fo-cart__empty-title {
+    margin: 0 0 10px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #111111;
+}
+
+.fo-cart__empty-text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #666666;
+}
+
+/* CONTENT */
+.fo-cart__content {
+    margin-bottom: 30px;
+    overflow-x: auto;
+}
+
+/* TABLE */
+.fo-cart__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.fo-cart__table thead {
+    background: #f5f5f5;
+    border-bottom: 2px solid #d9d9d9;
+}
+
+.fo-cart__table th {
+    padding: 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #111111;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fo-cart__header-image {
+    width: 80px;
+}
+
+.fo-cart__header-name {
+    min-width: 180px;
+}
+
+.fo-cart__header-reference {
+    width: 120px;
+}
+
+.fo-cart__header-declination {
+    min-width: 150px;
+}
+
+.fo-cart__header-stock {
+    width: 80px;
+}
+
+.fo-cart__header-price {
+    width: 100px;
+}
+
+.fo-cart__header-quantity {
+    width: 100px;
+}
+
+.fo-cart__header-total {
+    width: 100px;
+}
+
+.fo-cart__header-actions {
+    width: 60px;
+}
+
+.fo-cart__table tbody tr {
+    border-bottom: 1px solid #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.fo-cart__table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.fo-cart__table td {
+    padding: 14px;
+    color: #333333;
+    font-size: 0.95rem;
+}
+
+.fo-cart__table img {
+    max-height: 60px;
+    max-width: 60px;
+    border-radius: 4px;
+}
+
+/* FOOTER */
+.fo-cart__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+}
+
+.fo-cart__totals {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 250px;
+}
+
+.fo-cart__total-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.fo-cart__total-row:last-child {
+    border-bottom: none;
+    padding-top: 6px;
+    padding-bottom: 0;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.fo-cart__total-label {
+    font-weight: 600;
+    color: #666666;
+    font-size: 0.9rem;
+}
+
+.fo-cart__total-value {
+    font-weight: 600;
+    color: #111111;
+    text-align: right;
+}
+
+.fo-cart__total-value--ttc {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.fo-cart__checkout-btn {
+    padding: 14px 32px;
+    background: #111111;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.fo-cart__checkout-btn:hover {
+    background: #333333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.fo-cart__checkout-btn:active {
+    transform: translateY(0);
+}
+
+.fo-cart__checkout-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .fo-cart {
+        padding: 16px;
+    }
+
+    .fo-cart__title {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+
+    .fo-cart__content {
+        overflow-x: auto;
+    }
+
+    .fo-cart__table th,
+    .fo-cart__table td {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+    }
+
+    .fo-cart__table th {
+        font-size: 0.75rem;
+    }
+
+    .fo-cart__table img {
+        max-height: 50px;
+        max-width: 50px;
+    }
+
+    .fo-cart__header-name {
+        min-width: 120px;
+    }
+
+    .fo-cart__header-declination {
+        min-width: 100px;
+    }
+
+    .fo-cart__footer {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .fo-cart__totals {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .fo-cart__checkout-btn {
+        width: 100%;
+    }
+}

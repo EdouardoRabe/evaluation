@@ -7,6 +7,7 @@ import CartWithDetails from "../backend/dto/CartWithDetails.js";
 import OderService from "../backend/services/OderService.js";
 import FOCartRow from "../components/FOCartRow.jsx";
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
+import "../css/pages/FOCart.css";
 
 const getFirstImage = (images) => images?.[0] || "";
 
@@ -280,60 +281,87 @@ function FOCart() {
     }, [user.id]);
 
     if (isLoading) {
-        return <p>chargement du panier...</p>;
+        return <div className="fo-cart fo-cart--loading"><p>Chargement du panier...</p></div>;
     }
 
     if (!cart) {
-        return <p>pas de panier</p>;
+        return (
+            <div className="fo-cart">
+                <div className="fo-cart__empty">
+                    <p className="fo-cart__empty-title">Votre panier est vide</p>
+                    <p className="fo-cart__empty-text">Commencez à ajouter des produits pour remplir votre panier.</p>
+                </div>
+            </div>
+        );
     }
 
-    return <>
-        <h1>Panier : {cart.id}</h1>
+    return (
+        <div className="fo-cart">
+            <h1 className="fo-cart__title">Votre Panier</h1>
 
-        {rowDetails.length === 0 ? (
-            <p>panier vide</p>
-        ) : (
-            <>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Reference</th>
-                        <th>Image</th>
-                        <th>Declinaison</th>
-                        <th>Stock</th>
-                        <th>Prix HT</th>
-                        <th>Prix TTC</th>
-                        <th>Quantite</th>
-                        <th>Total ligne</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
+            {rowDetails.length === 0 ? (
+                <div className="fo-cart__empty">
+                    <p className="fo-cart__empty-title">Panier vide</p>
+                    <p className="fo-cart__empty-text">Aucun produit dans votre panier pour le moment.</p>
+                </div>
+            ) : (
+                <>
+                    <div className="fo-cart__content">
+                        <table className="fo-cart__table">
+                            <thead>
+                                <tr>
+                                    <th className="fo-cart__header-image">Image</th>
+                                    <th className="fo-cart__header-name">Produit</th>
+                                    <th className="fo-cart__header-reference">Référence</th>
+                                    <th className="fo-cart__header-declination">Déclinaison</th>
+                                    <th className="fo-cart__header-stock">Stock</th>
+                                    <th className="fo-cart__header-price">Prix HT</th>
+                                    <th className="fo-cart__header-price">Prix TTC</th>
+                                    <th className="fo-cart__header-quantity">Quantité</th>
+                                    <th className="fo-cart__header-total">Total</th>
+                                    <th className="fo-cart__header-actions">Actions</th>
+                                </tr>
+                            </thead>
 
-                    <tbody>
-                    {rowDetails.map((row, index) => (
-                        <FOCartRow
-                            key={getRowKey(row, index)}
-                            row={row}
-                            index={index}
-                            onOptionChange={handleOptionChange}
-                            onQuantityChange={handleQuantityChange}
-                            onDelete={handleDeleteRow}
-                            formatPrice={formatPrice}
-                        />
-                    ))}
-                    </tbody>
-                </table>
+                            <tbody>
+                                {rowDetails.map((row, index) => (
+                                    <FOCartRow
+                                        key={getRowKey(row, index)}
+                                        row={row}
+                                        index={index}
+                                        onOptionChange={handleOptionChange}
+                                        onQuantityChange={handleQuantityChange}
+                                        onDelete={handleDeleteRow}
+                                        formatPrice={formatPrice}
+                                    />
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                <p>Total HT : {formatPrice(totals.totalHt)}</p>
-                <p>Total TTC : {formatPrice(totals.totalTtc)}</p>
+                    <div className="fo-cart__footer">
+                        <div className="fo-cart__totals">
+                            <div className="fo-cart__total-row">
+                                <span className="fo-cart__total-label">Total HT</span>
+                                <span className="fo-cart__total-value">{formatPrice(totals.totalHt)}€</span>
+                            </div>
+                            <div className="fo-cart__total-row">
+                                <span className="fo-cart__total-label">Total TTC</span>
+                                <span className="fo-cart__total-value fo-cart__total-value--ttc">{formatPrice(totals.totalTtc)}€</span>
+                            </div>
+                        </div>
 
-                <button onClick={handleCheckout}>
-                    Commander
-                </button>
-            </>
-        )}
-    </>;
+                        <button 
+                            onClick={handleCheckout}
+                            className="fo-cart__checkout-btn"
+                        >
+                            Commander
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
 }
 
 export default FOCart;
