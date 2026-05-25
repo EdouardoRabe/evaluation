@@ -29,6 +29,7 @@ function FOCart() {
     const [cart, setCart] = useState(null);
     const [rowDetails, setRowDetails] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [actionResult, setActionResult] = useState(null);
 
     const [user] = useLocalStorage("user", null);
     const [isGuest] = useLocalStorage("isGuest", false);
@@ -158,19 +159,31 @@ function FOCart() {
         }
 
         try {
-            const result =
-                await OderService.createOrderFromCart(cart, user.id, new Date(),0);
-            console.log(result);
-            alert(
-                "Commande créée avec succès !"
-            );
+            await OderService.createOrderFromCart(cart, user.id, new Date(),0);
+            setActionResult({
+                success: true,
+                message: "Commande créée avec succès. Redirection vers vos commandes en cours..."
+            });
         } catch (error) {
             console.error(error);
-            alert(
-                "Erreur lors de la création."
-            );
+            setActionResult({
+                success: false,
+                message: error?.message || "Erreur lors de la création de la commande."
+            });
         }
     };
+
+    useEffect(() => {
+        if (!actionResult?.success) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            navigate("/fo/orders");
+        }, 2200);
+
+        return () => clearTimeout(timer);
+    }, [actionResult, navigate]);
 
     useEffect(() => {
         const loadDatas = async () => {
@@ -298,6 +311,13 @@ function FOCart() {
     return (
         <div className="fo-cart">
             <h1 className="fo-cart__title">Votre Panier</h1>
+
+            {actionResult ? (
+                <div className={`fo-cart__message fo-cart__message--${actionResult.success ? "success" : "error"}`}>
+                    <strong>{actionResult.success ? "✓ Succès" : "✗ Erreur"}</strong>
+                    <div>{actionResult.message}</div>
+                </div>
+            ) : null}
 
             {rowDetails.length === 0 ? (
                 <div className="fo-cart__empty">

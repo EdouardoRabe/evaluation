@@ -1,0 +1,67 @@
+.fo-guest-checkout {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.fo-guest-checkout__title {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111111;
+}
+
+.fo-guest-checkout__message {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 6px;
+    border-left: 4px solid;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fo-guest-checkout__message--success {
+    background: #d4edda;
+    border-color: #155724;
+    color: #155724;
+}
+
+.fo-guest-checkout__message--error {
+    background: #f8d7da;
+    border-color: #721c24;
+    color: #721c24;
+}
+
+.fo-guest-checkout__message strong {
+    font-weight: 700;
+}
+
+.fo-guest-checkout__message div {
+    font-size: 0.92rem;
+    opacity: 0.92;
+}
+
+.fo-guest-checkout__modes,
+.fo-guest-checkout__actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.fo-guest-checkout__modes button,
+.fo-guest-checkout__actions button,
+.fo-guest-checkout__form button {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.fo-guest-checkout__form {
+    display: grid;
+    gap: 10px;
+    max-width: 520px;
+}

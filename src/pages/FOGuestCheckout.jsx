@@ -6,6 +6,7 @@ import Customer from "../backend/entities/Customer.js";
 import OderService from "../backend/services/OderService.js";
 import CustomerService from "../backend/services/CustomerService.js";
 import FOUserRow from "../components/FOUserRow.jsx";
+import "../css/pages/FOGuestCheckout.css";
 
 function FOGuestCheckout() {
     const [user, setUser] = useLocalStorage("user", null);
@@ -14,6 +15,7 @@ function FOGuestCheckout() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const [mode, setMode] = useState("login");
     const [customers, setCustomers] = useState([]);
@@ -157,13 +159,26 @@ function FOGuestCheckout() {
         }
         const dateNow = new Date();
         OderService.createOrderFromCart(cart, user.id, dateNow, 0).then(() => {
-            alert("Commande créée avec succès !");
-            navigate("/fo/orders");
+            setError("");
+            setSuccessMessage("Commande créée avec succès. Redirection vers vos commandes en cours...");
         }).catch((err) => {
             console.error("Error creating order: ", err);
             setError("Erreur lors de la creation de la commande");
+            setSuccessMessage("");
         });
     };
+
+    useEffect(() => {
+        if (!successMessage) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            navigate("/fo/orders");
+        }, 2200);
+
+        return () => clearTimeout(timer);
+    }, [navigate, successMessage]);
 
     if (isLoading) {
         return <p>Chargement...</p>;
@@ -174,12 +189,13 @@ function FOGuestCheckout() {
     }
 
     return (
-        <div>
-            <h1>Finaliser la commande</h1>
+        <div className="fo-guest-checkout">
+            <h1 className="fo-guest-checkout__title">Finaliser la commande</h1>
 
-            {error ? <p>{error}</p> : null}
+            {error ? <div className="fo-guest-checkout__message fo-guest-checkout__message--error"><strong>✗ Erreur</strong><div>{error}</div></div> : null}
+            {successMessage ? <div className="fo-guest-checkout__message fo-guest-checkout__message--success"><strong>✓ Succès</strong><div>{successMessage}</div></div> : null}
 
-            <div>
+            <div className="fo-guest-checkout__modes">
                 <button type="button" onClick={() => setMode("login")}>Se connecter</button>
                 <button type="button" onClick={() => setMode("register")}>Inserer les infos</button>
             </div>
@@ -209,7 +225,7 @@ function FOGuestCheckout() {
                     </table>
                 </div>
             ) : (
-                <form onSubmit={handleFormSubmit}>
+                <form className="fo-guest-checkout__form" onSubmit={handleFormSubmit}>
                     <h2>Informations client</h2>
                     <input type="text" placeholder="Firstname" value={form.firstname} onChange={handleFormChange("firstname")} />
                     <input type="text" placeholder="Lastname" value={form.lastname} onChange={handleFormChange("lastname")} />
@@ -222,13 +238,13 @@ function FOGuestCheckout() {
                 </form>
             )}
 
-            {!isGuest ? (
-                <div>
+            {isGuest ? null : (
+                <div className="fo-guest-checkout__actions">
                     <button type="button" onClick={handleConfirmOrder}>
                         Effectuer la commande
                     </button>
                 </div>
-            ) : null}
+            )}
         </div>
     );
 }
