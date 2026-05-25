@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect } from "react";
+import "../css/components/FOCartRow.css";
 
 function FOCartRow({ row, index, onOptionChange, onQuantityChange, onDelete, formatPrice }) {
     const options = row?.options ?? [];
@@ -101,10 +102,32 @@ function FOCartRow({ row, index, onOptionChange, onQuantityChange, onDelete, for
             <td>{row.stockQuantity ?? "-"}</td>
             <td>{formatPrice(getRowDisplayedHtPrice(row))}</td>
             <td>{formatPrice(getRowDisplayedPrice(row))}</td>
-            <td>
-                <button type="button" onClick={handleDecrease}>-</button>
-                <input type="number" value={row.quantity} readOnly min={1} />
-                <button type="button" onClick={handleIncrease}>+</button>
+            <td className="fo-cart-row__quantity-cell">
+                <div className="fo-cart-row__quantity-control">
+                    <button 
+                        type="button" 
+                        onClick={handleDecrease}
+                        className="fo-cart-row__quantity-btn"
+                        aria-label="Diminuer la quantité"
+                    >
+                        −
+                    </button>
+                    <input 
+                        type="number" 
+                        value={row.quantity} 
+                        readOnly 
+                        min={1}
+                        className="fo-cart-row__quantity-input"
+                    />
+                    <button 
+                        type="button" 
+                        onClick={handleIncrease}
+                        className="fo-cart-row__quantity-btn"
+                        aria-label="Augmenter la quantité"
+                    >
+                        +
+                    </button>
+                </div>
             </td>
             <td>{formatPrice(getRowLineTotal(row))}</td>
             <td>
