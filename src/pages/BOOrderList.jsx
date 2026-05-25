@@ -123,7 +123,7 @@ function BOOrderList() {
                     )}
                 </div>
             )}
-            {isLoading ? (<p>Chargements des clients</p>) : (
+            {isLoading ? (<p>Chargements des commandes</p>) : (
                 <BOOrderRow
                     title="Commandes"
                     rows={filteredOrders}

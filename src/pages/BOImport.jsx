@@ -1,5 +1,6 @@
 import {useState} from "react";
 import executeImport from "../backend/services/import/executeImport.js";
+import "../css/pages/BOImport.css"
 
 function BOImport() {
     const [productFile, setProductFile] = useState(null)
@@ -9,7 +10,7 @@ function BOImport() {
     const [importResult, setImportResult] = useState(null)
     const [importError, setImportError] = useState(null)
     const [isImporting, setIsImporting] = useState(false)
-    const [doImport, setDoImport] = useState(false)
+    const [skipImageImport, setSkipImageImport] = useState(false)
 
     const handleSubmit = async (event) => {
         event.preventDefault()
@@ -23,7 +24,7 @@ function BOImport() {
                 declinaisonFile,
                 ordersFile,
                 imageZipFile,
-                doImport,
+                doImport: skipImageImport,
                 onProgress: (progress) => console.log(progress),
             })
 
@@ -36,59 +37,52 @@ function BOImport() {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label>
-                    <span>Produits</span>
-                    <input
-                        type={"file"}
-                        placeholder={"Produits"}
-                        accept={".csv"}
-                        onChange={(event) => setProductFile(event.target.files?.[0] ?? null)}
-                    />
+        <form className="bo-import" onSubmit={handleSubmit}>
+            <div className="bo-import__grid">
+                <label className="bo-import__field">
+                    <span className="bo-import__label">Produits</span>
+                    <input className="bo-import__input" type={"file"} accept={".csv"} onChange={(event) => setProductFile(event.target.files?.[0] ?? null)} />
                 </label>
-                {productFile && <p>{productFile.name}</p>}
-                <label>
-                    <span>Déclinaisons & Stock initiaux</span>
-                    <input
-                        type={"file"}
-                        placeholder={"Produits"}
-                        accept={".csv"}
-                        onChange={(event) => setDeclinaisonFile(event.target.files?.[0] ?? null)}
-                    />
+                {productFile && <p className="bo-import__file">{productFile.name}</p>}
+
+                <label className="bo-import__field">
+                    <span className="bo-import__label">Déclinaisons & Stock initiaux</span>
+                    <input className="bo-import__input" type={"file"} accept={".csv"} onChange={(event) => setDeclinaisonFile(event.target.files?.[0] ?? null)} />
                 </label>
-                {declinaisonFile && <p>{declinaisonFile.name}</p>}
-                <label>
-                    <span>Clients & Commandes</span>
-                    <input
-                        type={"file"}
-                        placeholder={"Produits"}
-                        accept={".csv"}
-                        onChange={(event) => setOrdersFile(event.target.files?.[0] ?? null)}
-                    />
+                {declinaisonFile && <p className="bo-import__file">{declinaisonFile.name}</p>}
+
+                <label className="bo-import__field">
+                    <span className="bo-import__label">Clients & Commandes</span>
+                    <input className="bo-import__input" type={"file"} accept={".csv"} onChange={(event) => setOrdersFile(event.target.files?.[0] ?? null)} />
                 </label>
-                {ordersFile && <p>{ordersFile.name}</p>}
-                <label>
-                    <span>Images</span>
-                    <input type="checkbox"
-                        checked={doImport}
-                        onChange={(event) => setDoImport(event.target.checked)}
-                    />
+                {ordersFile && <p className="bo-import__file">{ordersFile.name}</p>}
+
+                <label className="bo-import__field bo-import__field--images">
+                    <span className="bo-import__label">Images</span>
+                    <label className="bo-import__check">
+                        <input
+                            type="checkbox"
+                            checked={skipImageImport}
+                            onChange={(event) => setSkipImageImport(event.target.checked)}
+                        />
+                        <span>Ne pas importer les images</span>
+                    </label>
                     <input
+                        className="bo-import__input"
                         type={"file"}
-                        placeholder={"Produits"}
                         accept={".zip"}
                         onChange={(event) => setImageZipFile(event.target.files?.[0] ?? null)}
                     />
                 </label>
-                {imageZipFile && <p>{imageZipFile.name}</p>}
-                <button type={"submit"} disabled={isImporting}>
+                {imageZipFile && <p className="bo-import__file">{imageZipFile.name}</p>}
+
+                <button className="bo-import__submit" type={"submit"} disabled={isImporting}>
                     {isImporting ? 'Import en cours...' : 'Importer'}
                 </button>
             </div>
 
-            {importError && <p>{importError}</p>}
-            {importResult && <pre>{JSON.stringify(importResult, null, 2)}</pre>}
+            {importError && <div className="bo-import__message bo-import__message--error">{importError}</div>}
+            {importResult && <pre className="bo-import__result">{JSON.stringify(importResult, null, 2)}</pre>}
         </form>
     )
 }
