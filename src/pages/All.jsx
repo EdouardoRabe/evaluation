@@ -116,6 +116,25 @@ function All() {
             title: `Client ${client.firstname || ""} ${client.lastname || ""}`.trim(),
         })
     }
+    
+    const handleExportAllCSV = () => {
+        const date = new Date().toISOString().split('T')[0]
+        exportRowsToCSV({
+            rows: filteredClients,
+            columns: clientExportColumns,
+            filename: `clients-export-${date}`,
+        })
+    }
+    
+    const handleExportAllPDF = () => {
+        const date = new Date().toISOString().split('T')[0]
+        exportRowsToPDF({
+            rows: filteredClients,
+            columns: clientExportColumns,
+            filename: `clients-export-${date}`,
+            title: `Clients export ${date}`,
+        })
+    }
 
     if (isLoading) {
         return <div className="all-page"><p>Chargement des clients...</p></div>
@@ -159,6 +178,24 @@ function All() {
                     <div className="all-page__stat-value">{formatPrice(stats.avgSpentPerClient)}€</div>
                 </div>
             </section>
+
+            <div style={{ display: 'flex', gap: '10px', margin: '16px 0' }}>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => handleExportAllCSV()}
+                    disabled={filteredClients.length === 0}
+                >
+                    📥 Exporter CSV (toutes les lignes)
+                </button>
+
+                <button
+                    className="btn btn-primary"
+                    onClick={() => handleExportAllPDF()}
+                    disabled={filteredClients.length === 0}
+                >
+                    📄 Exporter PDF (toutes les lignes)
+                </button>
+            </div>
 
             {/* Filtres */}
             <section className="all-page__filters">
