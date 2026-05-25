@@ -14,6 +14,38 @@
     color: #666666;
 }
 
+/* MESSAGE RESULT */
+.fo-product-preview__message {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 6px;
+    border-left: 4px solid;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fo-product-preview__message--success {
+    background: #d4edda;
+    border-color: #155724;
+    color: #155724;
+}
+
+.fo-product-preview__message--error {
+    background: #f8d7da;
+    border-color: #721c24;
+    color: #721c24;
+}
+
+.fo-product-preview__message strong {
+    font-weight: 700;
+}
+
+.fo-product-preview__message div {
+    font-size: 0.92rem;
+    opacity: 0.92;
+}
+
 /* CONTAINER */
 .fo-product-preview__container {
     display: grid;

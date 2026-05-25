@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Product from "../backend/entities/Product.js";
 import CartService from "../backend/services/CartService.js";
 import "../css/pages/FOProductPreview.css";
 
 function FOProductPreview() {
     const { id } = useParams();
+    const navigate = useNavigate();
 
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +18,7 @@ function FOProductPreview() {
     const [imageUrl, setImageUrl] = useState("");
     const [stockQuantity, setStockQuantity] = useState(null);
     const [badge, setBadge] = useState(null);
+    const [actionResult, setActionResult] = useState(null);
 
     const handleDeclinaisonChange = (e) => {
         const selectedId = Number(e.target.value);
@@ -38,7 +40,10 @@ function FOProductPreview() {
         const idCustomer = user?.id;
 
         if (!idCustomer) {
-            alert("Veuillez vous connecter avant d'ajouter au panier.");
+            setActionResult({
+                success: false,
+                message: "Veuillez vous connecter avant d'ajouter au panier."
+            });
             return;
         }
 
@@ -49,10 +54,16 @@ function FOProductPreview() {
             product.id, 
             idProductAttribute, 
             quantity, 1).then(() => {
-            alert("Produit ajouté au panier !");
+            setActionResult({
+                success: true,
+                message: "Produit ajouté au panier avec succès !"
+            });
         }).catch((error) => {
             console.error("Error adding to cart: ", error);
-            alert("Erreur lors de l'ajout au panier.");
+            setActionResult({
+                success: false,
+                message: error?.message || "Erreur lors de l'ajout au panier."
+            });
         });
     };
 
@@ -117,6 +128,15 @@ function FOProductPreview() {
         loadProduct();
     }, [id]);
 
+    useEffect(() => {
+        if (actionResult?.success) {
+            const timer = setTimeout(() => {
+                navigate("/fo/cart");
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [actionResult, navigate]);
+
     if (isLoading) 
         return <div className="fo-product-preview fo-product-preview--loading"><p>Chargement...</p></div>;
     if (!product) 
@@ -124,6 +144,15 @@ function FOProductPreview() {
 
     return (
         <div className="fo-product-preview">
+            {actionResult && (
+                <div className={`fo-product-preview__message fo-product-preview__message--${actionResult.success ? "success" : "error"}`}>
+                    <strong>
+                        {actionResult.success ? "✓ Succès" : "✗ Erreur"}
+                    </strong>
+                    <div>{actionResult.message}</div>
+                </div>
+            )}
+
             <div className="fo-product-preview__container">
                 {/* IMAGE SECTION */}
                 <div className="fo-product-preview__image-section">
