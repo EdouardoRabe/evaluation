@@ -211,6 +211,12 @@ function BOStatistic() {
             header: "Achat total",
             accessorFn: (row) => Number(row?.totalAchat ?? 0),
             Cell: ({cell}) => formatNumber(cell.getValue()),
+            // muiTableBodyCellProps: ({ cell }) => ({
+            //     sx: {
+            //         color: Number(cell.getValue() ?? 0) > 50 ? "#721c24" : "#155724",
+            //         fontWeight: Number(cell.getValue() ?? 0) > 50 ? "bold" : "normal",
+            //     },
+            // }),
             Footer: () => <strong>{formatNumber(orderCategoryFromStockTotal.totalAchat)}</strong>,
         },
         {
@@ -318,31 +324,31 @@ function BOStatistic() {
                         ))}
                     </section>
 
-                    <div>
-                        <label>
-                            <div>date min</div>
+                    <section className="stats-filters">
+                        <label className="stats-filters__field">
+                            <div className="stats-filters__label">Date min</div>
                             <input
-                                className="stats-date-input"
+                                className="stats-filters__input"
                                 type="date"
                                 value={dateMin}
                                 onChange={(event) => setDateMin(event.target.value)}
                             />
                         </label>
 
-                        <label>
-                            <div>date max</div>
+                        <label className="stats-filters__field">
+                            <div className="stats-filters__label">Date max</div>
                             <input
-                                className="stats-date-input"
+                                className="stats-filters__input"
                                 type="date"
                                 value={dateMax}
                                 onChange={(event) => setDateMax(event.target.value)}
                             />
                         </label>
 
-                        <button onClick={resetDateFilter}>
+                        <button className="stats-filters__reset" type="button" onClick={resetDateFilter}>
                             Reset filtre date
                         </button>
-                    </div>
+                    </section>
                     <MaterialReactTable table={table}/>
 
                     <h3>Commande par categorie (cout depuis mouvements)</h3>
