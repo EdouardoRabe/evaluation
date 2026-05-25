@@ -1,5 +1,6 @@
 import api from "../utils/api"
 import { toJSON, toJSONList, toXML } from "../xml/productXML"
+import { buildApiFilterQuery } from "../utils/utils"
 import ProductOptionValue from "./ProductOptionValue"
 import TaxRule from "./TaxRule"
 import Tax from "./Tax"
@@ -523,9 +524,9 @@ class Product {
 		}
 
 		const xml = await api.get(`${this.endpoint}?display=full${filter}`)
-		const orders = toJSONList(xml)
+		const products = toJSONList(xml)
 
-		return orders.map((productData) => Product.fromData(productData))
+		return products.map((productData) => Product.fromData(productData))
 	}
 
 	// API-side inverse filter: request items where fieldName is NOT in value
@@ -536,8 +537,8 @@ class Product {
 
 		const filter = `&filter[${fieldName}]=![${normalized.join("|")}]`
 		const xml = await api.get(`${this.endpoint}?display=full${filter}`)
-		const orders = toJSONList(xml)
-		return orders.map((orderData) => Order.fromData(orderData))
+		const products = toJSONList(xml)
+		return products.map((productData) => Product.fromData(productData))
 	}
 }
 
