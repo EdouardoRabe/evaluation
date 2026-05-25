@@ -214,14 +214,21 @@ function FOOderRow({
             {
                 header: "REFERENCE",
                 accessorKey: "id",
+                size: 90,
+                minSize: 70,
+                maxSize: 110,
             },
             {
                 header: "NOM",
                 accessorKey: "customerName",
+                size: 240,
+                minSize: 180,
             },
             {
                 header: "DATE",
                 accessorFn: (row) => formatDateTime(row.dateAdd) || "N/A",
+                size: 150,
+                minSize: 140,
             },
             {
                 header: "TOTAL",
@@ -229,14 +236,20 @@ function FOOderRow({
                     const total = Number(row?.totalPaid ?? row?.totals?.totalTtc ?? 0)
                     return Number.isFinite(total) ? total.toFixed(2) : "N/A"
                 },
+                size: 110,
+                minSize: 100,
             },
             {
                 header: "ETAT ACTUEL",
                 accessorKey: "orderStateName",
+                size: 220,
+                minSize: 180,
             },
             {
                 header: "ACTION",
                 Cell: OrderActionCell,
+                size: 300,
+                minSize: 280,
             },
         ],
         [],
@@ -256,21 +269,33 @@ function FOOderRow({
                 // trigger fetch if not loaded
                 fetchOrderDetails(order).catch(() => {})
                 return (
-                    <div style={{ padding: 12 }}>
+                    <div className="fo-order-row__detail-panel">
                         Chargement des détails...
                     </div>
                 )
             }
 
             return (
-                <div style={{ padding: 12 }}>
+                <div className="fo-order-row__detail-panel">
                     <OrderDetailsSubrow orderWithDetails={dto} />
                 </div>
             )
         },
         enablePagination: true,
+        layoutMode: "grid-no-grow",
         initialState: {
             pagination: { pageIndex: 0, pageSize: 10 },
+        },
+        muiTablePaperProps: {
+            sx: {
+                width: "100%",
+            },
+        },
+        muiTableContainerProps: {
+            sx: {
+                width: "100%",
+                overflowX: "auto",
+            },
         },
         muiTableBodyRowProps: ({ row }) => ({
             sx: {
@@ -292,31 +317,27 @@ function OrderDetailsSubrow({ orderWithDetails }) {
     const rows = orderWithDetails?.orderDetails || []
 
     if (!rows || rows.length === 0) {
-        return <div>Aucun détail</div>
+        return <div className="fo-order-row__detail-empty">Aucun détail</div>
     }
 
     return (
         <div className="fo-order-details-subrow">
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr style={{ backgroundColor: '#f1f1f1' }}>
-                        <th style={{ padding: 8, textAlign: 'left' }}>Produit</th>
-                        <th style={{ padding: 8, textAlign: 'right' }}>Qté</th>
-                        <th style={{ padding: 8, textAlign: 'right' }}>Prix Unitaire</th>
-                        <th style={{ padding: 8, textAlign: 'right' }}>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((d) => (
-                        <tr key={d.id}>
-                            <td style={{ padding: 8 }}>{d.productName || d.productReference || `#${d.productId}`}</td>
-                            <td style={{ padding: 8, textAlign: 'right' }}>{d.productQuantity ?? d.quantity ?? 0}</td>
-                            <td style={{ padding: 8, textAlign: 'right' }}>{Number(d.unitPrice ?? d.unitPriceTaxIncl ?? d.unitPriceTaxExcl ?? 0).toFixed(2)}€</td>
-                            <td style={{ padding: 8, textAlign: 'right' }}>{Number(d.totalPriceTaxIncl ?? d.totalPriceTaxExcl ?? 0).toFixed(2)}€</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className="fo-order-details-subrow__header">
+                <span>Produit</span>
+                <span>Qté</span>
+                <span>Prix unitaire</span>
+                <span>Total</span>
+            </div>
+            <div className="fo-order-details-subrow__rows">
+                {rows.map((d) => (
+                    <div className="fo-order-details-subrow__row" key={d.id}>
+                        <span className="fo-order-details-subrow__product" data-label="Produit">{d.productName || d.productReference || `#${d.productId}`}</span>
+                        <span className="fo-order-details-subrow__qty" data-label="Qté">{d.productQuantity ?? d.quantity ?? 0}</span>
+                        <span className="fo-order-details-subrow__price" data-label="Prix unitaire">{Number(d.unitPrice ?? d.unitPriceTaxIncl ?? d.unitPriceTaxExcl ?? 0).toFixed(2)}€</span>
+                        <span className="fo-order-details-subrow__price" data-label="Total">{Number(d.totalPriceTaxIncl ?? d.totalPriceTaxExcl ?? 0).toFixed(2)}€</span>
+                    </div>
+                ))}
+            </div>
         </div>
     )
 }

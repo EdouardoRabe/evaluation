@@ -16,8 +16,64 @@
     align-items: center;
 }
 
+.fo-order-row__detail-panel {
+    padding: 12px 16px;
+    background: #fbfbfb;
+    border-top: 1px solid #e5e5e5;
+}
+
+.fo-order-row__detail-empty {
+    padding: 8px 0;
+    color: #666;
+    font-style: italic;
+}
+
+.fo-order-details-subrow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-x: auto;
+}
+
+.fo-order-details-subrow__header,
+.fo-order-details-subrow__row {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.6fr) 70px 110px 110px;
+    gap: 12px;
+    align-items: center;
+}
+
+.fo-order-details-subrow__header {
+    padding: 8px 10px;
+    background: #f1f1f1;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #222;
+}
+
+.fo-order-details-subrow__row {
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #ededed;
+    font-size: 0.88rem;
+}
+
+.fo-order-details-subrow__product {
+    min-width: 0;
+    word-break: break-word;
+}
+
+.fo-order-details-subrow__qty,
+.fo-order-details-subrow__price {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
 .fo-order-row__input {
-    min-width: 160px;
+    min-width: 130px;
     padding: 9px 10px;
     border: 1px solid #d9d9d9;
     border-radius: 6px;
@@ -26,8 +82,8 @@
 }
 
 .fo-order-row__input--small {
-    min-width: 90px;
-    width: 90px;
+    min-width: 78px;
+    width: 78px;
 }
 
 .fo-order-row__input:hover,
@@ -68,7 +124,7 @@
 /* Quantity Control Styles */
 .fo-order-row__quantity-control {
     display: inline-grid;
-    grid-template-columns: 34px 160px 34px;
+    grid-template-columns: 34px 120px 34px;
     align-items: center;
     border: 1px solid #d9d9d9;
     border-radius: 6px;
@@ -110,9 +166,9 @@
 }
 
 .fo-order-row__quantity-input {
-    width: 160px;
+    width: 120px;
     height: 34px;
-    min-width: 160px;
+    min-width: 120px;
     border: none;
     background: #ffffff;
     text-align: center;
@@ -138,4 +194,59 @@
 .fo-order-row__quantity-input[type=number] {
     appearance: textfield;
     -moz-appearance: textfield;
+}
+
+@media (max-width: 1200px) {
+    .fo-order-row__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fo-order-row__quantity-control {
+        width: 100%;
+        grid-template-columns: 34px minmax(80px, 1fr) 34px;
+    }
+
+    .fo-order-row__quantity-input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .fo-order-row__input,
+    .fo-order-row__button {
+        width: 100%;
+    }
+
+    .fo-order-details-subrow__header,
+    .fo-order-details-subrow__row {
+        grid-template-columns: minmax(150px, 1fr) 54px 92px 92px;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 720px) {
+    .fo-order-details-subrow__header {
+        display: none;
+    }
+
+    .fo-order-details-subrow__row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .fo-order-details-subrow__qty,
+    .fo-order-details-subrow__price {
+        text-align: left;
+    }
+
+    .fo-order-details-subrow__row > span::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #666;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
 }
