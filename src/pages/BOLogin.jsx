@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import "../css/pages/BOLogin.css";
 
 function BOLogin() {
     const navigate = useNavigate();
@@ -25,13 +26,16 @@ function BOLogin() {
     }
 
     return (
-        <div>
-            <h1>Connexion Backoffice</h1>
-            <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
-                <button type="submit">Se connecter</button>
-            </form>
+        <div className="login-shell">
+            <div className="login-card">
+                <h1>Connexion Backoffice</h1>
+                <form onSubmit={handleSubmit}>
+                    <input className="form-control" type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <input className="form-control" type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <button className="btn btn--primary" type="submit">Se connecter</button>
+                </form>
+                <div className="login-footer">Utilise admin@gmail.com / admin123 pour accéder au backoffice local</div>
+            </div>
         </div>
     );
 }

@@ -4,6 +4,7 @@ import FOUserRow from "../components/FOUserRow.jsx";
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
 import CustomerService from "../backend/services/CustomerService.js";
 import {useNavigate} from "react-router-dom";
+import "../css/pages/FOUserList.css";
 
 function FOUserList() {
     const [customers, setCustomers] = useState([]);
@@ -45,35 +46,32 @@ function FOUserList() {
         navigate('/fo/products')
     }
 
-    return <>
-        <h1>Se connecter avec un client</h1>
-        <button type={"button"} onClick={() => connectGuest()}>
-            Connexion anonyme
-        </button>
-        {isLoading ? (<p>Chargements des clients</p>) : (
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                {
-                    customers.map(customer =>
-                        <FOUserRow
-                            key={customer.id}
-                            customer={customer}
-                            onClick={() => connectCustomer(customer)}
-                        />)
-                }
-                </tbody>
-            </table>)
-        }
-    </>
+    return (
+        <div className="users-page">
+            <h1>Se connecter avec un client</h1>
+            <div className="users-shell">
+                <div className="users-actions">
+                    <button className="btn btn--primary anon-cta" type="button" onClick={() => connectGuest()}>
+                        Connexion anonyme
+                    </button>
+                </div>
+
+                {isLoading ? (
+                    <p>Chargements des clients</p>
+                ) : (
+                    <div className="users-list">
+                        {customers.map(customer => (
+                            <FOUserRow
+                                key={customer.id}
+                                customer={customer}
+                                onClick={() => connectCustomer(customer)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }
 
 export default FOUserList;

@@ -1,0 +1,38 @@
+.users-page {
+    width: min(1200px, calc(100% - 32px));
+    margin: 24px auto 48px;
+}
+
+.users-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.users-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.users-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.user-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-strong);
+}
+
+.user-card__info { display: flex; flex-direction: column; gap: 4px; }
+.user-card__meta { color: var(--muted); font-size: 0.95rem; }
+.user-card__actions { display: flex; gap: 8px; margin-top: 8px; }
+
+.anon-cta { margin-right: auto; }
