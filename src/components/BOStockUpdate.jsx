@@ -4,11 +4,13 @@ import StockAvailable from "../backend/entities/StockAvailable.js";
 import StockMvt from "../backend/entities/StockMvt.js";
 import {formatDateTime} from "../backend/utils/utils.js";
 import {MaterialReactTable, useMaterialReactTable} from "material-react-table";
+import "../css/pages/BOStockUpdate.css"
 
 function BOStockUpdate({setCombination, setProductDetails}) {
     const [data, setData] = useState([])
     const [quantity, setQuantity] = useState({})
     const [dateChange, setDateChange] = useState("")
+    const [actionResult, setActionResult] = useState(null)
 
     const ID_MVT_REASON = {
         AUGMENTATION: {
@@ -75,6 +77,7 @@ function BOStockUpdate({setCombination, setProductDetails}) {
                     <input
                         type={"number"}
                         value={quantity[row.id] ?? ""}
+                        min={1}
                         onChange={(e) =>
                             setQuantity((prev) => ({
                                 ...prev,
@@ -88,14 +91,14 @@ function BOStockUpdate({setCombination, setProductDetails}) {
         {
             header: "Actions",
             Cell: ({row}) => (
-                <div>
-                    <button onClick={() => updateQuantity(row, ID_MVT_REASON.AUGMENTATION)}>
+                <div className="bo-stock-update__actions">
+                    <button className="bo-stock-update__button bo-stock-update__button--add" onClick={() => updateQuantity(row, ID_MVT_REASON.AUGMENTATION)}>
                         Ajouter
                     </button>
-                    <button onClick={() => updateQuantity(row, ID_MVT_REASON.DIMINUTION)}>
+                    <button className="bo-stock-update__button bo-stock-update__button--remove" onClick={() => updateQuantity(row, ID_MVT_REASON.DIMINUTION)}>
                         Retirer
                     </button>
-                    <button onClick={() => {
+                    <button className="bo-stock-update__button bo-stock-update__button--view" onClick={() => {
                         const isDeclination = Boolean(row.original?.isDeclination)
                         const product = isDeclination ? row.original.parentProduct : row.original.product
                         const idProductAttribute = isDeclination ? (row.original.combinationId ?? 0) : 0
@@ -126,6 +129,10 @@ function BOStockUpdate({setCombination, setProductDetails}) {
 
             if (!existing) {
                 console.error("stock_available introuvable", {idProduct, idProductAttribute})
+                setActionResult({
+                    success: false,
+                    message: "Stock disponible introuvable pour cette ligne.",
+                })
                 return
             }
 
@@ -158,8 +165,17 @@ function BOStockUpdate({setCombination, setProductDetails}) {
                 delete next[row.id]
                 return next
             })
+            const suffix = idProductAttribute ? ` / déclinaison ${idProductAttribute}` : ""
+            setActionResult({
+                success: true,
+                message: `Stock mis à jour avec succès pour ${idProduct}${suffix}.`,
+            })
         } catch (error) {
             console.error("Erreur lors de la mise à jour du stock:", error)
+            setActionResult({
+                success: false,
+                message: error?.message || "Erreur lors de la mise à jour du stock.",
+            })
         }
     }
 
@@ -180,16 +196,20 @@ function BOStockUpdate({setCombination, setProductDetails}) {
         <header>
             <h1>Mise à jour des stocks</h1>
         </header>
-        <div>
-            <label>
-                Date de changement
-                <input
-                    type={"date"}
-                    value={dateChange}
-                    onChange={(e) => setDateChange(e.target.value)}
-                />
-            </label>
-        </div>
+        {actionResult && (
+            <div className={`bo-stock-update__message ${actionResult.success ? "bo-stock-update__message--success" : "bo-stock-update__message--error"}`}>
+                <strong>{actionResult.success ? "Mise à jour réussie" : "Mise à jour impossible"}</strong>
+                <div>{actionResult.message}</div>
+            </div>
+        )}
+        <label>
+            <div>Date de changement</div>
+            <input
+                type={"date"}
+                value={dateChange}
+                onChange={(e) => setDateChange(e.target.value)}
+            />
+        </label>
         <MaterialReactTable table={table}/>
     </>
 }
