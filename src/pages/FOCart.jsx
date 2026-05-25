@@ -180,6 +180,12 @@ function FOCart() {
                     .fromCart(customerCart)
                     .enrich();
 
+                // Debug: log enriched rows to verify image urls (remove in production)
+                try {
+                    // eslint-disable-next-line no-console
+                    console.debug("CartWithDetails.enrichedRows:", enriched.enrichedRows);
+                } catch (e) {}
+
                 const enrichedByKey = new Map();
                 for (const enrichedRow of enriched.enrichedRows ?? []) {
                     const key = `${enrichedRow.productId}:${enrichedRow.productAttributeId}`;
@@ -222,11 +228,15 @@ function FOCart() {
                         const declinaisons = await product.getDeclinaisons();
                         const values = declinaisons?.values || [];
 
-                        return {
+                        const productImages = await product.getImages();
+                        const fallbackImage = (productImages && productImages.length) ? productImages[0] : "";
+
+                        const builtRow = {
                             productId,
                             productName: enrichedRow.productName,
                             productReference: product.reference,
-                            productImageURL: enrichedRow.imageUrl,
+                            productImageURL: enrichedRow.imageUrl || fallbackImage || "",
+                            imageUrl: enrichedRow.imageUrl || fallbackImage || "",
                             quantity: row?.quantity,
                             baseTtcPrice: await product.getTtcPrice(),
                             taxRate: await product.getTax(),
@@ -239,6 +249,8 @@ function FOCart() {
                             stockQuantity,
                             cartRowIndex: index
                         };
+
+                        return builtRow;
                     })
                 ))
                     .filter(Boolean);

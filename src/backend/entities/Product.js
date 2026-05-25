@@ -14,9 +14,12 @@ const toList = (value) => {
 }
 
 const buildImageUrl = (productId, imageId) => {
+	const idNum = Number(imageId)
+	if (!Number.isFinite(idNum) || idNum <= 0) return ""
+
 	const baseUrl = import.meta.env.VITE_PRESTASHOP_BACKEND_URL || ""
 	const apiKey = import.meta.env.VITE_PRESTASHOP_API_KEY
-	const url = `${baseUrl}api/images/products/${productId}/${imageId}`
+	const url = `${baseUrl}api/images/products/${productId}/${idNum}`
 	return apiKey ? `${url}?ws_key=${apiKey}` : url
 }
 
@@ -385,7 +388,7 @@ class Product {
 		const imageIds = combination?.imageIds ?? []
 		if (imageIds.length > 0) {
 			const firstId = Number(imageIds[0])
-			if (Number.isFinite(firstId)) {
+			if (Number.isFinite(firstId) && firstId > 0) {
 				imageUrl = buildImageUrl(this.id, firstId)
 			}
 		}
@@ -455,7 +458,7 @@ class Product {
 		for (const id of this.associations.images) {
 			const numberId = Number(id);
 
-			if (Number.isFinite(numberId)) {
+			if (Number.isFinite(numberId) && numberId > 0) {
 				imageIds.push(numberId);
 			}
 		}

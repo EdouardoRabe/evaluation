@@ -62,15 +62,16 @@ function FOCartRow({ row, index, onOptionChange, onQuantityChange, onDelete, for
             <td>{row.productName || ""}</td>
             <td>{row.productReference || ""}</td>
             <td>
-                {row.productImageURL ? (
-                    <img
-                        src={row.productImageURL}
-                        alt={row.productImageURL}
-                        width="120"
-                    />
-                ) : (
-                    "-"
-                )}
+                {
+                    (() => {
+                        const imageSrc = row.productImageURL || row.imageUrl || "";
+                        return imageSrc ? (
+                            <img src={imageSrc} alt={imageSrc} width="120" />
+                        ) : (
+                            "-"
+                        );
+                    })()
+                }
             </td>
             <td>
                 {options.length > 0 ? (
