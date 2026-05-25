@@ -79,6 +79,7 @@ function OrderActionCell({ cell, table }) {
     const isCartMode = actionMode === "cart"
     const isSelected = isCartMode ? Number(edit?.cartId ?? 0) === rowId : Number(edit?.orderId ?? 0) === rowId
     const baseDate = formatDateInput(row.original?.dateAdd)
+    const nowDate = formatDateInput(new Date())
 
     if (isCartMode) {
         const dateValue = isSelected ? (edit?.cartDateOrder || baseDate) : baseDate
@@ -99,7 +100,7 @@ function OrderActionCell({ cell, table }) {
         )
     }
 
-    const dateValue = isSelected ? (edit?.dateUpdate || baseDate) : baseDate
+    const dateValue = isSelected ? (edit?.dateUpdate || nowDate) : nowDate
     const multiplicateur = meta.multiplicateur ?? 1
     const multiplicateurValue = isSelected ? (edit?.multiplicateur ?? multiplicateur) : multiplicateur
 
