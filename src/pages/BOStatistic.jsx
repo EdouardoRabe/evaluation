@@ -13,6 +13,7 @@ import StockAvailable from "../backend/entities/StockAvailable.js";
 import StockCategoryAvailability from "../backend/dto/StockCategoryAvailability.js";
 import {MaterialReactTable, useMaterialReactTable} from "material-react-table"
 import {getDisplayText, toInt} from "../backend/utils/utils.js";
+import "../css/pages/BOStatistic.css"
 
 function BOStatistic() {
     const [loading, setLoading] = useState(true)
@@ -272,6 +273,26 @@ function BOStatistic() {
         setDateMax("");
     }
 
+    const statisticKpiRows = [
+        [
+            {label: "Total Quantite", value: formatNumber(orderCategoryTotals.quantity), tone: "gray"},
+            {label: "Total Vente", value: formatNumber(orderCategoryTotals.totalVente), tone: "gray"},
+        ],
+        [
+            {label: "Total Achat", value: formatNumber(orderCategoryTotals.totalAchat), tone: "light"},
+            {label: "Benefice", value: formatNumber(orderCategoryTotals.benefice), tone: "light"},
+        ],
+        [
+            {label: "Total Achat (MVT)", value: formatNumber(orderCategoryFromStockTotal.totalAchat), tone: "dark"},
+            {label: "Benefice", value: formatNumber(orderCategoryFromStockTotal.benefice), tone: "dark"},
+        ],
+        [
+            {label: "Total Physique", value: stockTotal.physique, tone: "gray"},
+            {label: "Total Reserver", value: stockTotal.reserve, tone: "gray"},
+            {label: "Total dispo", value: stockTotal.dispo, tone: "gray"},
+        ],
+    ]
+
     return (
         <div>
             <h1>Statistiques</h1>
@@ -281,24 +302,42 @@ function BOStatistic() {
 
             {!loading && !error && (
                 <div>
+                    <section className="stats-kpi">
+                            {statisticKpiRows.map((row) => (
+                            <div
+                                    key={row.map((item) => item.label).join("-")}
+                                className={`stats-kpi__row stats-kpi__row--${row.length}`}
+                            >
+                                {row.map((item) => (
+                                    <div key={item.label} className={`stats-kpi__card stats-kpi__card--${item.tone}`}>
+                                        <div className="stats-kpi__label">{item.label}</div>
+                                        <strong className="stats-kpi__value">{item.value}</strong>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </section>
+
                     <div>
-                        <div>
-                            date min
+                        <label>
+                            <div>date min</div>
                             <input
+                                className="stats-date-input"
                                 type="date"
                                 value={dateMin}
                                 onChange={(event) => setDateMin(event.target.value)}
                             />
-                        </div>
+                        </label>
 
-                        <div>
-                            date max
+                        <label>
+                            <div>date max</div>
                             <input
+                                className="stats-date-input"
                                 type="date"
                                 value={dateMax}
                                 onChange={(event) => setDateMax(event.target.value)}
                             />
-                        </div>
+                        </label>
 
                         <button onClick={resetDateFilter}>
                             Reset filtre date
