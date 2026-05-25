@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect } from "react";
 
 function FOCartRow({ row, index, onOptionChange, onQuantityChange, onDelete, formatPrice }) {
@@ -24,6 +25,17 @@ function FOCartRow({ row, index, onOptionChange, onQuantityChange, onDelete, for
         const base = Number(rowValue?.baseTtcPrice || 0);
         const taxRate = Number(rowValue?.taxRate || 0);
         return base + impact * (1 + taxRate / 100);
+    };
+
+    const getRowDisplayedHtPrice = (rowValue) => {
+        const selectedId = Number(rowValue?.selectedOptionId || 0);
+        const selected = (rowValue?.options || []).find((value) => Number(value.id) === selectedId);
+        const impact = selected ? Number(selected.priceImpact || 0) : 0;
+        const baseTtc = Number(rowValue?.baseTtcPrice || 0);
+        const taxRate = Number(rowValue?.taxRate || 0);
+        const divisor = 1 + taxRate / 100;
+        const baseHt = divisor ? baseTtc / divisor : baseTtc;
+        return baseHt + impact;
     };
 
     const getRowLineTotal = (rowValue) => {
@@ -87,6 +99,7 @@ function FOCartRow({ row, index, onOptionChange, onQuantityChange, onDelete, for
                 )}
             </td>
             <td>{row.stockQuantity ?? "-"}</td>
+            <td>{formatPrice(getRowDisplayedHtPrice(row))}</td>
             <td>{formatPrice(getRowDisplayedPrice(row))}</td>
             <td>
                 <button type="button" onClick={handleDecrease}>-</button>

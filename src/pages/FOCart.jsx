@@ -302,6 +302,7 @@ function FOCart() {
                         <th>Image</th>
                         <th>Declinaison</th>
                         <th>Stock</th>
+                        <th>Prix HT</th>
                         <th>Prix TTC</th>
                         <th>Quantite</th>
                         <th>Total ligne</th>
