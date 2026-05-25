@@ -62,7 +62,7 @@ const getLastCartByCustomer = async (idCustomer) => {
 };
 
 
-const createOrUpdateCart  = async (idCustomer, date = new Date(), initialRows = []) => {    
+const createOrUpdateCart  = async (idCustomer, date = new Date(), initialRows = [], forceNewCart = false) => {    
 
     const dateUsed = ensureLocalDateTime(date)
 
@@ -72,7 +72,7 @@ const createOrUpdateCart  = async (idCustomer, date = new Date(), initialRows = 
     const address = await customer.getAddress();
     
     const customerCart = await getLastCartByCustomer(idCustomer);
-    if (customerCart && await isCartActive(customerCart.id)) {
+    if (!forceNewCart && customerCart && await isCartActive(customerCart.id)) {
         return { cart: customerCart, isNew: false };
     }
 
@@ -133,7 +133,7 @@ const deleteItems = async (cart, rowIndex) => {
     return cart;
 }
 
-const addProductToCart = async (idCustomer, idProduct, idProductAttribute, quantity, multiplicateur = 1) => {
+const addProductToCart = async (idCustomer, idProduct, idProductAttribute, quantity, multiplicateur = 1, forceNewCart = false, date = new Date()) => {
     const factor = Number(multiplicateur) || 1;
     const safeQty = Math.max(1, Math.trunc((Number(quantity) || 0) * factor));
 
@@ -144,7 +144,7 @@ const addProductToCart = async (idCustomer, idProduct, idProductAttribute, quant
         addressDeliveryId: 0,
     };
 
-    const { cart, isNew } = await createOrUpdateCart(idCustomer, new Date(), [cartRow]);
+    const { cart, isNew } = await createOrUpdateCart(idCustomer, date, [cartRow], forceNewCart);
     if (isNew) {
         return cart;
     }
@@ -158,14 +158,14 @@ const addProductToCart = async (idCustomer, idProduct, idProductAttribute, quant
 const duplicateCart = async(cart, multiplicateur, dateUpdate) => {
     let duplicatedCart = null
 
-    for (const row of cart.cartRows) {
+    for (const [index, row] of cart.cartRows.entries()) {
         row.quantity = Number(row.quantity) * multiplicateur
         // Possible aleas
         // const checkQuantity = await getStockForProductAttribute(row.productId, row.productAttributeId);
         // if (row.quantity > checkQuantity) {
         //     row.quantity = checkQuantity
         // }
-        duplicatedCart = await addProductToCart(cart.customerId, row.productId, row.productAttributeId, row.quantity)
+        duplicatedCart = await addProductToCart(cart.customerId, row.productId, row.productAttributeId, row.quantity, 1, index === 0, dateUpdate)
     }
 
     return duplicatedCart
