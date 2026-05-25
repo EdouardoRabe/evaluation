@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import "../css/layouts/FOMainLayout.css";
 
 function FOMainLayout() {
     const location = useLocation();
@@ -15,17 +16,23 @@ function FOMainLayout() {
 
     if (isGuest) {
         return (
-            <>
-                <nav>
-                    <Link to="/fo/products">Products</Link>
-                    <Link to="/fo/cart">My cart</Link>
-                    <button onClick={handleLogout}>Logout</button>
+            <div className="fo-shell">
+                <nav className="fo-nav">
+                    <div className="fo-nav__brand">
+                        <span className="fo-nav__brand-mark" />
+                        <span>Shop</span>
+                    </div>
+                    <div className="fo-nav__links">
+                        <Link className="fo-nav__link" to="/fo/products">Products</Link>
+                        <Link className="fo-nav__link" to="/fo/cart">My cart</Link>
+                        <button className="fo-nav__button" onClick={handleLogout}>Logout</button>
+                    </div>
                 </nav>
 
                 <main>
                     <Outlet />
                 </main>
-            </>
+            </div>
         );
     }
 
@@ -34,18 +41,24 @@ function FOMainLayout() {
     }
 
     return (
-        <>
-            <nav>
-                <Link to="/fo/products">Products</Link>
-                <Link to="/fo/orders">My orders</Link>
-                <Link to="/fo/cart">My cart</Link>
-                <button onClick={handleLogout}>Logout</button>
+        <div className="fo-shell">
+            <nav className="fo-nav">
+                <div className="fo-nav__brand">
+                    <span className="fo-nav__brand-mark" />
+                    <span>Shop</span>
+                </div>
+                <div className="fo-nav__links">
+                    <Link className="fo-nav__link" to="/fo/products">Products</Link>
+                    <Link className="fo-nav__link" to="/fo/orders">My orders</Link>
+                    <Link className="fo-nav__link" to="/fo/cart">My cart</Link>
+                    <button className="fo-nav__button" onClick={handleLogout}>Logout</button>
+                </div>
             </nav>
 
             <main>
                 <Outlet />
             </main>
-        </>
+        </div>
     );
 }
 
