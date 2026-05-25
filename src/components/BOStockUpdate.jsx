@@ -178,7 +178,7 @@ function BOStockUpdate({setCombination, setProductDetails}) {
 
     return <>
         <header>
-            <h5>Mise à jour des stocks</h5>
+            <h1>Mise à jour des stocks</h1>
         </header>
         <div>
             <label>

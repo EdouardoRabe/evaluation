@@ -75,7 +75,7 @@ function BOStockEvolution({combination, productDetails}) {
 
     return <div>
         <header>
-            <h4>Evolution de stock</h4>
+            <h1>Evolution de stock</h1>
             <div>
                 <label>
                     Du

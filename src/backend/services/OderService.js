@@ -147,7 +147,7 @@ const updateOrderState = async (orderId, newStateId, dateUpdate) => {
         const latest = sortedHistories.length > 0 ? sortedHistories[0] : null
         const currentStateId = latest ? Number(latest.orderStateId ?? 0) : null
 
-        const allowed = new Set(["11-5", "11-6", "5-6"])
+        const allowed = new Set(["11-5", "11-6"])
         const fromTo = `${currentStateId ?? "null"}-${Number(newStateId)}`
         if (!allowed.has(fromTo)) {
             throw new Error(`Transition de statut non autorisée: ${fromTo}`)

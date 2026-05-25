@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import orderService from "../backend/services/OderService"
 import BOOrderRow from "../components/BOOrderRow";
 import { formatDateInput, isDateInRange } from "../backend/utils/utils"
+import "../css/pages/BOOrderList.css"
 
 function BOOrderList() {
     const [orders, setOrders] = useState([]);
@@ -42,13 +43,23 @@ function BOOrderList() {
 
         try {
             const result = await orderService.updateOrderState(orderId, newStateId, dateUpdate);
-            setActionResult(result);
+            setActionResult({
+                success: true,
+                orderId,
+                orderStateId: newStateId,
+                dateUpdate,
+                message: `Commande ${orderId} mise à jour avec succès à l'état ${newStateId}.`,
+                orderHistory: result?.orderHistory ?? null,
+                rawResponse: result?.rawResponse ?? null,
+            });
         } catch (error) {
             console.log("Erreur lors de la modification de l'état de la commande", error);
             setActionResult({
                 success: false,
                 orderId,
                 orderStateId: newStateId,
+                dateUpdate,
+                message: `Erreur lors de la mise à jour de la commande ${orderId}.`,
                 error: error?.message || "Erreur inconnue",
             });
         }
@@ -100,11 +111,15 @@ function BOOrderList() {
                 </label>
             </div>
             {actionResult && (
-                <div style={{ marginBottom: "20px", padding: "10px", border: "1px solid", backgroundColor: actionResult.success ? "#d4edda" : "#f8d7da", color: actionResult.success ? "#155724" : "#721c24" }}>
+                <div className={`bo-order-message ${actionResult.success ? "bo-order-message--success" : "bo-order-message--error"}`}>
+                    <strong>{actionResult.success ? "Mise à jour réussie" : "Mise à jour impossible"}</strong>
+                    <div>{actionResult.message}</div>
                     {actionResult.success ? (
-                        <>Commande {actionResult.orderId} mise à jour avec succès à l'état {actionResult.orderStateId}. Dernier historique : {actionResult.orderHistory ? `ID ${actionResult.orderHistory.id} à ${actionResult.orderHistory.dateAdd}` : "Aucun historique trouvé"}.</>
+                        <div className="bo-order-message__detail">
+                            Dernier historique : {actionResult.orderHistory ? `ID ${actionResult.orderHistory.id} à ${actionResult.orderHistory.dateAdd}` : "Aucun historique trouvé"}
+                        </div>
                     ) : (
-                        <>Erreur lors de la mise à jour de la commande {actionResult.orderId} : {actionResult.error}</>
+                        <div className="bo-order-message__detail">Détail: {actionResult.error}</div>
                     )}
                 </div>
             )}
