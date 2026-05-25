@@ -28,12 +28,12 @@ function BOMainLayout() {
                     <span>Back Office</span>
                 </div>
                 <div className="bo-nav__links">
-                    <Link className="bo-nav__link" to={"/reset"}> Reset </Link>
-                    <Link className="bo-nav__link" to={"/import"}> Import </Link>
-                    <Link className="bo-nav__link" to={"/stocks"}>Stocks</Link>
-                    <Link className="bo-nav__link" to={"/orders"}> Orders </Link>
-                    <Link className="bo-nav__link" to={"/statistics"}>Statistics</Link>
                     <Link className="bo-nav__link" to={"/dashboard"}>Dashboard</Link>
+                    <Link className="bo-nav__link" to={"/statistics"}>Statistics</Link>
+                    <Link className="bo-nav__link" to={"/orders"}> Orders </Link>
+                    <Link className="bo-nav__link" to={"/stocks"}>Stocks</Link>
+                    <Link className="bo-nav__link" to={"/import"}> Import </Link>
+                    <Link className="bo-nav__link" to={"/reset"}> Reset </Link>
                     <button className="bo-nav__button" type="button" onClick={handleLogout}>Logout</button>
                 </div>
             </nav>

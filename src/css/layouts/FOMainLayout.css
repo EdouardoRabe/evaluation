@@ -14,7 +14,7 @@
     margin: 16px auto 0;
     width: min(1200px, calc(100% - 32px));
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(14px);
     box-shadow: var(--shadow);
@@ -35,7 +35,7 @@
     min-height: 42px;
     padding: 0 16px;
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: 10px;
     background: #111111;
     color: #ffffff;
     transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease;
