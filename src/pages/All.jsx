@@ -1,12 +1,32 @@
 import { useEffect, useState, useMemo } from "react"
 import Customer from "../backend/entities/Customer.js"
 import ClientWithDetails from "../backend/dto/ClientWithDetails.js"
+import { exportRowsToCSV, exportRowsToPDF } from "../backend/utils/exportUtils.js"
 import "../css/pages/All.css"
 const ensureArray = (value) => {
     if (Array.isArray(value)) return value
     if (value) return [value]
     return []
 }
+
+const clientExportColumns = [
+    { label: "ID", value: (client) => client.id },
+    { label: "Prénom", value: (client) => client.firstname },
+    { label: "Nom", value: (client) => client.lastname },
+    { label: "Email", value: (client) => client.email },
+    { label: "Nb commandes", value: (client) => client.orderCount },
+    { label: "Total dépensé", value: (client) => Number(client.totalSpent || 0).toFixed(2) },
+    {
+        label: "Produits achetés",
+        value: (client) => (client.productBreakdown || [])
+            .map((product) => `${product.quantity}x ${product.productName} (${Number(product.totalSpent || 0).toFixed(2)}€)`)
+            .join(" | "),
+    },
+    {
+        label: "Date d'inscription",
+        value: (client) => client.dateAdd ? new Date(client.dateAdd).toLocaleDateString("fr-FR") : "",
+    },
+]
 
 
 function All() {
@@ -31,9 +51,10 @@ function All() {
                 const customerList = ensureArray(allCustomers)
 
                 // Enrichir chaque client
-                const enrichedClients = await Promise.all(
-                    customerList.map(customer => ClientWithDetails.fromCustomer(customer))
-                )
+                const enrichedClients = []
+                for (const customer of customerList) {
+                    enrichedClients.push(await ClientWithDetails.fromCustomer(customer))
+                }
 
                 setClients(enrichedClients)
             } catch (err) {
@@ -77,6 +98,23 @@ function All() {
     const formatPrice = (value) => {
         const num = Number(value || 0)
         return num.toFixed(2)
+    }
+
+    const handleExportClientCSV = (client) => {
+        exportRowsToCSV({
+            rows: [client],
+            columns: clientExportColumns,
+            filename: `client-${client.id}-${client.lastname || "export"}`,
+        })
+    }
+
+    const handleExportClientPDF = (client) => {
+        exportRowsToPDF({
+            rows: [client],
+            columns: clientExportColumns,
+            filename: `client-${client.id}-${client.lastname || "export"}`,
+            title: `Client ${client.firstname || ""} ${client.lastname || ""}`.trim(),
+        })
     }
 
     if (isLoading) {
@@ -176,6 +214,7 @@ function All() {
                                     <th>Total Dépensé</th>
                                     <th>Produits Achetés</th>
                                     <th>Date d'inscription</th>
+                                    <th>Export</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -203,6 +242,14 @@ function All() {
                                             )}
                                         </td>
                                         <td className="all-page__date">{client.dateAdd ? new Date(client.dateAdd).toLocaleDateString('fr-FR') : '—'}</td>
+                                        <td className="all-page__actions">
+                                            <button type="button" className="all-page__action-btn" onClick={() => handleExportClientCSV(client)}>
+                                                CSV
+                                            </button>
+                                            <button type="button" className="all-page__action-btn" onClick={() => handleExportClientPDF(client)}>
+                                                PDF
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
