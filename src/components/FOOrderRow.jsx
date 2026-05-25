@@ -1,9 +1,73 @@
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table"
 import { formatDateInput, formatDateTime } from "../backend/utils/utils"
 import "../css/components/FOOrderRow.css"
 
 const noopValidator = () => null
+
+function OrderMultiplicateurControl({ rowId, value, onChange }) {
+    const [localValue, setLocalValue] = useState(String(value ?? 1))
+
+    const commitValue = (nextValue) => {
+        const normalizedValue = Math.max(1, Number(nextValue) || 1)
+        setLocalValue(String(normalizedValue))
+        onChange?.(rowId, false)({
+            target: {
+                name: "multiplicateur",
+                value: normalizedValue,
+            },
+        })
+    }
+
+    const handleInputChange = (event) => {
+        const nextValue = event.target.value.replace(/\D/g, "")
+        setLocalValue(nextValue)
+
+        if (nextValue === "") {
+            return
+        }
+
+        onChange?.(rowId, false)({
+            target: {
+                name: "multiplicateur",
+                value: Math.max(1, Number(nextValue) || 1),
+            },
+        })
+    }
+
+    return (
+        <div className="fo-order-row__quantity-control">
+            <button
+                className="fo-order-row__quantity-btn fo-order-row__quantity-btn--minus"
+                onClick={() => commitValue(Number(localValue || 1) - 1)}
+                disabled={Number(localValue || 1) <= 1}
+                aria-label="Diminuer le multiplicateur"
+                type="button"
+            >
+                −
+            </button>
+            <input
+                type="text"
+                className="fo-order-row__quantity-input"
+                value={localValue}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                onChange={handleInputChange}
+                onFocus={(event) => event.target.select()}
+                onClick={(event) => event.target.select()}
+                aria-label="Multiplicateur"
+            />
+            <button
+                className="fo-order-row__quantity-btn fo-order-row__quantity-btn--plus"
+                onClick={() => commitValue(Number(localValue || 1) + 1)}
+                aria-label="Augmenter le multiplicateur"
+                type="button"
+            >
+                +
+            </button>
+        </div>
+    )
+}
 
 function OrderActionCell({ cell, table }) {
     const meta = table?.options?.meta ?? {}
@@ -38,48 +102,14 @@ function OrderActionCell({ cell, table }) {
     const multiplicateur = meta.multiplicateur ?? 1
     const multiplicateurValue = isSelected ? (edit?.multiplicateur ?? multiplicateur) : multiplicateur
 
-    const handleMultiplicateurChange = (type) => {
-        const currentValue = Math.max(1, Number(multiplicateurValue) || 1)
-        const newValue = type === "minus" ? Math.max(1, currentValue - 1) : currentValue + 1
-        const event = {
-            target: {
-                name: "multiplicateur",
-                value: newValue,
-            },
-        }
-        meta.onChangeRef?.current?.(rowId, false)(event)
-    }
-
     return (
         <div className="fo-order-row__actions">
-            <div className="fo-order-row__quantity-control">
-                <button
-                    className="fo-order-row__quantity-btn fo-order-row__quantity-btn--minus"
-                    onClick={() => handleMultiplicateurChange("minus")}
-                    disabled={multiplicateurValue <= 1}
-                    aria-label="Diminuer le multiplicateur"
-                    type="button"
-                >
-                    −
-                </button>
-                <input
-                    type="number"
-                    className="fo-order-row__quantity-input"
-                    value={multiplicateurValue}
-                    min={1}
-                    step={1}
-                    onChange={meta.onChangeRef?.current?.(rowId, false)}
-                    aria-label="Multiplicateur"
-                />
-                <button
-                    className="fo-order-row__quantity-btn fo-order-row__quantity-btn--plus"
-                    onClick={() => handleMultiplicateurChange("plus")}
-                    aria-label="Augmenter le multiplicateur"
-                    type="button"
-                >
-                    +
-                </button>
-            </div>
+            <OrderMultiplicateurControl
+                key={`${rowId}-${isSelected}`}
+                rowId={rowId}
+                value={multiplicateurValue}
+                onChange={meta.onChangeRef?.current}
+            />
             <input
                 type="date"
                 name="dateUpdate"
@@ -203,6 +233,12 @@ function FOOderRow({
 OrderActionCell.propTypes = {
     cell: noopValidator,
     table: noopValidator,
+}
+
+OrderMultiplicateurControl.propTypes = {
+    rowId: noopValidator,
+    value: noopValidator,
+    onChange: noopValidator,
 }
 
 FOOderRow.propTypes = {
