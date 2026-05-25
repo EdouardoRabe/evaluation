@@ -1,0 +1,127 @@
+.fo-order-row {
+    margin-top: 16px;
+}
+
+.fo-order-row__title {
+    margin-bottom: 12px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111111;
+}
+
+.fo-order-row__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.fo-order-row__input {
+    min-width: 160px;
+    padding: 9px 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.fo-order-row__input--small {
+    min-width: 90px;
+    width: 90px;
+}
+
+.fo-order-row__input:hover,
+.fo-order-row__input:focus {
+    border-color: #111111;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+    outline: none;
+}
+
+.fo-order-row__button {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #111111;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.fo-order-row__button:hover {
+    background: #333333;
+    transform: translateY(-1px);
+}
+
+.fo-order-row__button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.2);
+}
+
+.fo-order-row .MuiPaper-root {
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Quantity Control Styles */
+.fo-order-row__quantity-control {
+    display: inline-grid;
+    grid-template-columns: 34px 46px 34px;
+    gap: 4px;
+    align-items: center;
+}
+
+.fo-order-row__quantity-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111111;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    transition: transform 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.fo-order-row__quantity-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: #111111;
+    background: #f5f5f5;
+}
+
+.fo-order-row__quantity-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.fo-order-row__quantity-btn--plus {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+}
+
+.fo-order-row__quantity-btn--plus:hover:not(:disabled) {
+    background: #333333;
+}
+
+.fo-order-row__quantity-btn--minus {
+    background: #ffffff;
+}
+
+.fo-order-row__quantity-input {
+    min-height: 34px;
+    padding: 0 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    background: #f5f5f5;
+    color: #111111;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}

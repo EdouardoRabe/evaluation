@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import orderService from "../backend/services/OderService"
 import cartService from "../backend/services/CartService.js"
 import FOOrderRow from "../components/FOOrderRow"
 import useLocalStorage from "../hooks/useLocalStorage.jsx"
 import { formatDateInput, isDateInRange } from "../backend/utils/utils.js"
+import "../css/pages/FOOrderList.css"
 
 const getOrdersByCustomer = async (customerId) => {
     return await orderService.getOrderRowsByCustomer(customerId)
@@ -19,6 +21,7 @@ function FOOrderList() {
     const [carts, setCarts] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [user] = useLocalStorage("user", null)
+    const [actionResult, setActionResult] = useState(null)
     const [minDate, setMinDate] = useState("")
     const [maxDate, setMaxDate] = useState("")
     const [edit, setEdit] = useState({
@@ -42,8 +45,16 @@ function FOOrderList() {
     const handleClick = async (orderId) => {
         try {
             await orderService.duplicateCart(orderId, edit?.multiplicateur ?? 1, edit?.dateUpdate || formatDateInput(new Date()))
+            setActionResult({
+                success: true,
+                message: "Commande dupliquée avec succès. Redirection vers le panier...",
+            })
         } catch (error) {
             console.log("Erreur lors de la duplication du panier de la commande", error)
+            setActionResult({
+                success: false,
+                message: error?.message || "Erreur lors de la duplication de la commande.",
+            })
         }
     }
 
@@ -64,10 +75,32 @@ function FOOrderList() {
             setOrders(nextOrders)
             setCarts(nextCarts)
             setEdit({ orderId: null, multiplicateur: 1, dateUpdate: "", cartId: null, cartDateOrder: "" })
+            setActionResult({
+                success: true,
+                message: "Commande créée avec succès.",
+            })
         } catch (error) {
             console.error("Erreur création commande depuis panier", error)
+            setActionResult({
+                success: false,
+                message: error?.message || "Erreur lors de la création de la commande.",
+            })
         }
     }
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!actionResult?.success) {
+            return
+        }
+
+        const timer = setTimeout(() => {
+            navigate("/fo/cart")
+        }, 2200)
+
+        return () => clearTimeout(timer)
+    }, [actionResult, navigate])
 
     useEffect(() => {
         const loadAll = async () => {
@@ -124,30 +157,39 @@ function FOOrderList() {
     }, [cartRows, minDate, maxDate])
 
     return (
-        <>
-            <h1>Liste de tous les commandes</h1>
+        <div className="fo-order-list">
+            <h1 className="fo-order-list__title">Liste de tous les commandes</h1>
 
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
-                <label>
-                    Date min :{" "}
+            {actionResult ? (
+                <div className={`fo-order-list__message fo-order-list__message--${actionResult.success ? "success" : "error"}`}>
+                    <strong>{actionResult.success ? "✓ Succès" : "✗ Erreur"}</strong>
+                    <div>{actionResult.message}</div>
+                </div>
+            ) : null}
+
+            <div className="fo-order-list__filters">
+                <div className="fo-order-list__filter-group">
+                    <label htmlFor="fo-order-filter-min-date">Date min</label>
                     <input
+                        id="fo-order-filter-min-date"
                         type="date"
                         value={minDate}
                         onChange={(e) => setMinDate(e.target.value)}
                     />
-                </label>
-                <label>
-                    Date max :{" "}
+                </div>
+                <div className="fo-order-list__filter-group">
+                    <label htmlFor="fo-order-filter-max-date">Date max</label>
                     <input
+                        id="fo-order-filter-max-date"
                         type="date"
                         value={maxDate}
                         onChange={(e) => setMaxDate(e.target.value)}
                     />
-                </label>
+                </div>
             </div>
 
             {isLoading ? (
-                <p>Chargements des clients</p>
+                <p>Chargement des clients</p>
             ) : (
                 <FOOrderRow
                     title="Commandes"
@@ -163,7 +205,7 @@ function FOOrderList() {
             <h2>Mes paniers sans commande</h2>
 
             {isLoading ? (
-                <p>Chargements des paniers</p>
+                <p>Chargement des paniers</p>
             ) : (
                 <FOOrderRow
                     title="Paniers"
@@ -174,7 +216,7 @@ function FOOrderList() {
                     actionMode="cart"
                 />
             )}
-        </>
+        </div>
     )
 }
 
