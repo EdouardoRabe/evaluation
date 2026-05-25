@@ -8,6 +8,22 @@ import OderService from "../backend/services/OderService.js";
 import FOCartRow from "../components/FOCartRow.jsx";
 import useLocalStorage from "../hooks/useLocalStorage.jsx";
 
+const getFirstImage = (images) => images?.[0] || "";
+
+const getSelectedOptionImpact = (options, selectedOptionId) => {
+    const normalizedSelectedOptionId = Number(selectedOptionId || 0);
+    const selectedOption = (options || []).find((option) => Number(option.id) === normalizedSelectedOptionId) || null;
+    return Number(selectedOption?.priceImpact || 0);
+};
+
+const mapDeclinaisonOptions = (values = []) => (
+    values.map((value) => ({
+        id: value.id,
+        label: value.label,
+        priceImpact: value.priceImpact,
+    }))
+);
+
 function FOCart() {
     const [cart, setCart] = useState(null);
     const [rowDetails, setRowDetails] = useState([]);
@@ -73,7 +89,8 @@ function FOCart() {
 
     const handleOptionChange = async (rowIndex, nextId, cartRowIndex) => {
         updateRow(rowIndex, {
-            selectedOptionId: nextId
+            selectedOptionId: nextId,
+            selectedOptionImpact: getSelectedOptionImpact(rowDetails[rowIndex]?.options, nextId)
         });
 
         updateCartRow(cartRowIndex, {
@@ -180,12 +197,6 @@ function FOCart() {
                     .fromCart(customerCart)
                     .enrich();
 
-                // Debug: log enriched rows to verify image urls (remove in production)
-                try {
-                    // eslint-disable-next-line no-console
-                    console.debug("CartWithDetails.enrichedRows:", enriched.enrichedRows);
-                } catch (e) {}
-
                 const enrichedByKey = new Map();
                 for (const enrichedRow of enriched.enrichedRows ?? []) {
                     const key = `${enrichedRow.productId}:${enrichedRow.productAttributeId}`;
@@ -227,9 +238,8 @@ function FOCart() {
 
                         const declinaisons = await product.getDeclinaisons();
                         const values = declinaisons?.values || [];
-
                         const productImages = await product.getImages();
-                        const fallbackImage = (productImages && productImages.length) ? productImages[0] : "";
+                        const fallbackImage = getFirstImage(productImages);
 
                         const builtRow = {
                             productId,
@@ -240,12 +250,9 @@ function FOCart() {
                             quantity: row?.quantity,
                             baseTtcPrice: await product.getTtcPrice(),
                             taxRate: await product.getTax(),
-                            options: values.map(value => ({
-                                id: value.id,
-                                label: value.label,
-                                priceImpact: value.priceImpact
-                            })),
+                            options: mapDeclinaisonOptions(values),
                             selectedOptionId: attributeId,
+                            selectedOptionImpact: getSelectedOptionImpact(mapDeclinaisonOptions(values), attributeId),
                             stockQuantity,
                             cartRowIndex: index
                         };

@@ -33,7 +33,6 @@ const buildDeliveryOption = (addressId, carrierId = DEFAULT_CARRIER_ID) => {
 
 const isCartActive = async (idCart) => {
     const orderApi = new Order({}, false);
-    // const xml = orderApi.getBy("id_cart",idCart);
     const xml = await api.get(`${orderApi.endpoint}?display=full&filter[id_cart]=[${idCart}]`);
     const orders = toOrderJSONList(xml);
     return orders.length === 0;
@@ -41,12 +40,9 @@ const isCartActive = async (idCart) => {
 
 const getLastCartByCustomer = async (idCustomer) => {
     const cartApi = new Cart({}, false);
-
-        const response = await api.get(
-            `${cartApi.endpoint}?display=full&filter[id_customer]=[${idCustomer}]`
-        );
-
-    // const response = await cartApi.getBy("id_customer", idCustomer);
+    const response = await api.get(
+        `${cartApi.endpoint}?display=full&filter[id_customer]=[${idCustomer}]`
+    );
 
     const carts = toJSONList(response);
 
@@ -252,7 +248,9 @@ const getCartTotals = (cart) => {
         const qty = Number(row?.quantity || 0);
         const baseTtc = Number(row?.baseTtcPrice || 0);
         const taxRate = Number(row?.taxRate || 0);
-        const impact = Number(row?.selectedOptionImpact || 0);
+        const selectedOptionId = Number(row?.selectedOptionId || 0);
+        const selectedOption = (row?.options || []).find((option) => Number(option.id) === selectedOptionId) || null;
+        const impact = Number(row?.selectedOptionImpact ?? selectedOption?.priceImpact ?? 0);
         const divisor = 1 + taxRate / 100;
         const baseHt = divisor ? baseTtc / divisor : 0;
 
