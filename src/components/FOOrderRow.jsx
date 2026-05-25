@@ -180,6 +180,7 @@ function FOOderRow({
 
     const [detailsMap, setDetailsMap] = useState(() => new Map())
     const [loadingDetails, setLoadingDetails] = useState(() => new Set())
+    const [checkedDetails, setCheckedDetails] = useState(() => ({}))
 
     const fetchOrderDetails = async (order) => {
         if (!order?.id) return null
@@ -207,6 +208,31 @@ function FOOderRow({
                 return next
             })
         }
+    }
+
+    const handleToggleDetail = (orderId, detailObj) => {
+        setCheckedDetails((prev) => {
+            const current = prev[orderId] ?? []
+            const exists = current.some((d) => d.id === detailObj.id)
+            return {
+                ...prev,
+                [orderId]: exists
+                    ? current.filter((d) => d.id !== detailObj.id)
+                    : [...current, { ...detailObj, multiplicateur: 1 }],
+            }
+        })
+    }
+
+    const handleUpdateMultiplicateur = (orderId, detailId, value) => {
+        setCheckedDetails((prev) => {
+            const current = prev[orderId] ?? []
+            return {
+                ...prev,
+                [orderId]: current.map((d) =>
+                    d.id === detailId ? { ...d, multiplicateur: Math.max(1, value) } : d
+                ),
+            }
+        })
     }
 
     const columns = useMemo(
@@ -264,7 +290,8 @@ function FOOderRow({
             if (!ENABLE_ORDER_DETAILS) return null
 
             const order = row.original
-            const dto = detailsMap.get(Number(order?.id))
+            const orderId = Number(order?.id)
+            const dto = detailsMap.get(orderId)
             if (!dto) {
                 // trigger fetch if not loaded
                 fetchOrderDetails(order).catch(() => {})
@@ -277,7 +304,13 @@ function FOOderRow({
 
             return (
                 <div className="fo-order-row__detail-panel">
-                    <OrderDetailsSubrow orderWithDetails={dto} />
+                    <OrderDetailsSubrow
+                        orderId={orderId}
+                        orderWithDetails={dto}
+                        checkedDetails={checkedDetails[orderId] ?? []}
+                        onToggleDetail={(detailObj) => handleToggleDetail(orderId, detailObj)}
+                        onUpdateMultiplicateur={(detailId, value) => handleUpdateMultiplicateur(orderId, detailId, value)}
+                    />
                 </div>
             )
         },
@@ -313,31 +346,76 @@ function FOOderRow({
 }
 
 
-function OrderDetailsSubrow({ orderWithDetails }) {
+function OrderDetailsSubrow({ orderId, orderWithDetails, checkedDetails = [], onToggleDetail, onUpdateMultiplicateur }) {
     const rows = orderWithDetails?.orderDetails || []
 
     if (!rows || rows.length === 0) {
         return <div className="fo-order-row__detail-empty">Aucun détail</div>
     }
 
+    const handleDuplicate = () => {
+        if (checkedDetails.length === 0) {
+            alert("Veuillez sélectionner au moins un détail")
+            return
+        }
+        alert(JSON.stringify({
+            orderId,
+            selectedDetails: checkedDetails,
+        }, null, 2))
+    }
+
     return (
-        <div className="fo-order-details-subrow">
-            <div className="fo-order-details-subrow__header">
-                <span>Produit</span>
-                <span>Qté</span>
-                <span>Prix unitaire</span>
-                <span>Total</span>
+        <div className="fo-order-details-container">
+            <div className="fo-order-details-subrow">
+                <div className="fo-order-details-subrow__header">
+                    <span>☑️</span>
+                    <span>Produit</span>
+                    <span>Qté</span>
+                    <span>Prix unitaire</span>
+                    <span>Total</span>
+                    <span>Mult.</span>
+                </div>
+                <div className="fo-order-details-subrow__rows">
+                    {rows.map((d) => {
+                        const checked = checkedDetails.find((cd) => cd.id === d.id)
+                        const multiplicateur = checked?.multiplicateur ?? 1
+                        return (
+                            <div className="fo-order-details-subrow__row" key={d.id}>
+                                <input
+                                    type="checkbox"
+                                    checked={!!checked}
+                                    onChange={() => onToggleDetail(d)}
+                                    className="fo-order-details-subrow__checkbox"
+                                    aria-label={`Sélectionner ${d.productName}`}
+                                />
+                                <span className="fo-order-details-subrow__product" data-label="Produit">{d.productName || d.productReference || `#${d.productId}`}</span>
+                                <span className="fo-order-details-subrow__qty" data-label="Qté">{d.productQuantity ?? d.quantity ?? 0}</span>
+                                <span className="fo-order-details-subrow__price" data-label="Prix unitaire">{Number(d.unitPrice ?? d.unitPriceTaxIncl ?? d.unitPriceTaxExcl ?? 0).toFixed(2)}€</span>
+                                <span className="fo-order-details-subrow__price" data-label="Total">{Number(d.totalPriceTaxIncl ?? d.totalPriceTaxExcl ?? 0).toFixed(2)}€</span>
+                                {checked && (
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={multiplicateur}
+                                        onChange={(e) => onUpdateMultiplicateur(d.id, Number(e.target.value))}
+                                        className="fo-order-details-subrow__multiplicateur"
+                                        aria-label="Multiplicateur"
+                                    />
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
-            <div className="fo-order-details-subrow__rows">
-                {rows.map((d) => (
-                    <div className="fo-order-details-subrow__row" key={d.id}>
-                        <span className="fo-order-details-subrow__product" data-label="Produit">{d.productName || d.productReference || `#${d.productId}`}</span>
-                        <span className="fo-order-details-subrow__qty" data-label="Qté">{d.productQuantity ?? d.quantity ?? 0}</span>
-                        <span className="fo-order-details-subrow__price" data-label="Prix unitaire">{Number(d.unitPrice ?? d.unitPriceTaxIncl ?? d.unitPriceTaxExcl ?? 0).toFixed(2)}€</span>
-                        <span className="fo-order-details-subrow__price" data-label="Total">{Number(d.totalPriceTaxIncl ?? d.totalPriceTaxExcl ?? 0).toFixed(2)}€</span>
-                    </div>
-                ))}
-            </div>
+            {checkedDetails.length > 0 && (
+                <button
+                    type="button"
+                    onClick={handleDuplicate}
+                    className="fo-order-details-duplicate-btn"
+                >
+                     Dupliquer ({checkedDetails.length})
+                </button>
+            )}
         </div>
     )
 }
@@ -366,5 +444,9 @@ FOOderRow.propTypes = {
 export default FOOderRow
 
 OrderDetailsSubrow.propTypes = {
+    orderId: noopValidator,
     orderWithDetails: noopValidator,
+    checkedDetails: noopValidator,
+    onToggleDetail: noopValidator,
+    onUpdateMultiplicateur: noopValidator,
 }

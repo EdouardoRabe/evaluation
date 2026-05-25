@@ -35,10 +35,20 @@
     overflow-x: auto;
 }
 
+.fo-order-details-container {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.fo-order-details-container .fo-order-details-subrow {
+    flex: 1;
+}
+
 .fo-order-details-subrow__header,
 .fo-order-details-subrow__row {
     display: grid;
-    grid-template-columns: minmax(180px, 1.6fr) 70px 110px 110px;
+    grid-template-columns: 30px minmax(180px, 1.6fr) 70px 110px 110px 50px;
     gap: 12px;
     align-items: center;
 }
@@ -70,6 +80,66 @@
     text-align: right;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+}
+
+.fo-order-details-subrow__checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #111111;
+}
+
+.fo-order-details-subrow__multiplicateur {
+    width: 50px;
+    padding: 6px 6px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    background: #ffffff;
+    font-size: 0.85rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.fo-order-details-subrow__multiplicateur:focus {
+    outline: none;
+    border-color: #111111;
+    box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.1);
+}
+
+/* Remove number input spinners */
+.fo-order-details-subrow__multiplicateur::-webkit-outer-spin-button,
+.fo-order-details-subrow__multiplicateur::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.fo-order-details-subrow__multiplicateur[type=number] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.fo-order-details-duplicate-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #28a745;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+.fo-order-details-duplicate-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.fo-order-details-duplicate-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
 }
 
 .fo-order-row__input {
@@ -219,7 +289,7 @@
 
     .fo-order-details-subrow__header,
     .fo-order-details-subrow__row {
-        grid-template-columns: minmax(150px, 1fr) 54px 92px 92px;
+        grid-template-columns: 30px minmax(150px, 1fr) 54px 92px 92px 45px;
         gap: 8px;
     }
 }
