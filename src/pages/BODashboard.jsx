@@ -11,6 +11,7 @@ import {
 } from "../backend/services/DashboardService.js"
 import BODashboardTable from "../components/BODashboardTable.jsx"
 import { formatAmount, getOrderStateLabel } from "../backend/utils/dashboardUtils.js"
+import "../css/pages/BODashboard.css"
 
 function BODashboard() {
 	const [loading, setLoading] = useState(true)
@@ -59,6 +60,10 @@ function BODashboard() {
 	const cartTotals = useMemo(() => sumCartDashboardRowsTotals(filteredCartRows), [filteredCartRows])
 	const cartCount = useMemo(() => countDashboardRows(filteredCartRows), [filteredCartRows])
 
+	const generalCount = useMemo(() => ordersCount + cartCount, [ordersCount, cartCount])
+	const generalTotalHT = useMemo(() => Number(totals.totalHT || 0) + Number(cartTotals.totalHT || 0), [totals, cartTotals])
+	const generalTotalTTC = useMemo(() => Number(totals.totalTTC || 0) + Number(cartTotals.totalTTC || 0), [totals, cartTotals])
+
 	const resetFilters = () => {
 		setDateMin("")
 		setDateMax("")
@@ -74,33 +79,42 @@ function BODashboard() {
 
 			{!loading && !error && (
 				<div>
-					<section>
-						<div>
-							<div>Nombre de commandes</div>
-							<strong>{ordersCount}</strong>
+					<section className="dashboard-kpi">
+						<div className="dashboard-kpi__card dashboard-kpi__card--orders">
+							<div className="dashboard-kpi__label">Nombre de commandes</div>
+							<strong className="dashboard-kpi__value">{ordersCount}</strong>
 						</div>
-						<div>
-							<div>Total HT commandes</div>
-							<strong>{formatAmount(totals.totalHT)}</strong>
+						<div className="dashboard-kpi__card dashboard-kpi__card--orders">
+							<div className="dashboard-kpi__label">Total HT commandes</div>
+							<strong className="dashboard-kpi__value">{formatAmount(totals.totalHT)}</strong>
 						</div>
-						<div>
-							<div>Total TTC commandes</div>
-							<strong>{formatAmount(totals.totalTTC)}</strong>
+						<div className="dashboard-kpi__card dashboard-kpi__card--orders">
+							<div className="dashboard-kpi__label">Total TTC commandes</div>
+							<strong className="dashboard-kpi__value">{formatAmount(totals.totalTTC)}</strong>
 						</div>
-					</section>
-
-					<section>
-						<div>
-							<div>Nombre de paniers sans commande</div>
-							<strong>{cartCount}</strong>
+						<div className="dashboard-kpi__card dashboard-kpi__card--general">
+							<div className="dashboard-kpi__label">Nb General</div>
+							<strong className="dashboard-kpi__value">{generalCount}</strong>
 						</div>
-						<div>
-							<div>Total HT paniers</div>
-							<strong>{formatAmount(cartTotals.totalHT)}</strong>
+						<div className="dashboard-kpi__card dashboard-kpi__card--general">
+							<div className="dashboard-kpi__label">Total HT General</div>
+							<strong className="dashboard-kpi__value">{formatAmount(generalTotalHT)}</strong>
 						</div>
-						<div>
-							<div>Total TTC paniers</div>
-							<strong>{formatAmount(cartTotals.totalTTC)}</strong>
+						<div className="dashboard-kpi__card dashboard-kpi__card--general">
+							<div className="dashboard-kpi__label">Total TTC General</div>
+							<strong className="dashboard-kpi__value">{formatAmount(generalTotalTTC)}</strong>
+						</div>
+						<div className="dashboard-kpi__card dashboard-kpi__card--carts">
+							<div className="dashboard-kpi__label">Nombre de paniers sans commande</div>
+							<strong className="dashboard-kpi__value">{cartCount}</strong>
+						</div>
+						<div className="dashboard-kpi__card dashboard-kpi__card--carts">
+							<div className="dashboard-kpi__label">Total HT paniers</div>
+							<strong className="dashboard-kpi__value">{formatAmount(cartTotals.totalHT)}</strong>
+						</div>
+						<div className="dashboard-kpi__card dashboard-kpi__card--carts">
+							<div className="dashboard-kpi__label">Total TTC paniers</div>
+							<strong className="dashboard-kpi__value">{formatAmount(cartTotals.totalTTC)}</strong>
 						</div>
 					</section>
 
