@@ -124,21 +124,29 @@ function FOProductList() {
             <h1>Product List</h1>
 
             <div className="fo-product-list__filters">
-                <label htmlFor="filter-name">Name : </label>
-                <input id="filter-name" placeholder="Search name" value={name} onChange={(e) => setName(e.target.value)} />
-                <label htmlFor="filter-min-price">Min price : </label>
-                <input id="filter-min-price" placeholder="Min price" type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min={0} />
-                <label htmlFor="filter-max-price">Max price : </label>
-                <input id="filter-max-price" placeholder="Max price" type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min={0} />
-                <label htmlFor="filter-category">Category : </label>
-                <select id="filter-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                    <option value="">All Categories</option>
-                    {selectableCategories.map((category, index) => (
-                        <option key={`${category.id}-${index}`} value={category.id}>
-                            {category.name}
-                        </option>
-                    ))}
-                </select>
+                <div className="fo-product-list__filter-group">
+                    <label htmlFor="filter-name">Name</label>
+                    <input id="filter-name" placeholder="Search name" value={name} onChange={(e) => setName(e.target.value)} />
+                </div>
+                <div className="fo-product-list__filter-group">
+                    <label htmlFor="filter-min-price">Min price</label>
+                    <input id="filter-min-price" placeholder="0" type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min={0} />
+                </div>
+                <div className="fo-product-list__filter-group">
+                    <label htmlFor="filter-max-price">Max price</label>
+                    <input id="filter-max-price" placeholder="9999" type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min={0} />
+                </div>
+                <div className="fo-product-list__filter-group">
+                    <label htmlFor="filter-category">Category</label>
+                    <select id="filter-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                        <option value="">All Categories</option>
+                        {selectableCategories.map((category, index) => (
+                            <option key={`${category.id}-${index}`} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="fo-product-list__grid">
