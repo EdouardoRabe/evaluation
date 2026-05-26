@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import "../css/pages/All.css"
 import { useNavigate } from "react-router-dom";
 import Category from "../backend/entities/Category";
@@ -33,6 +33,10 @@ function Stk() {
         }
     }, [access]);
 
+    const selectableCategories = useMemo(() => {
+        return categories.filter((category) => String(category?.name ?? "").trim() !== "");
+    }, [categories]);
+
      const handleRemoveFromStock = async (idCategorie, quantity) => {
             try {
                 const result = await RemoveService.removeProductFromStock(idCategorie, quantity);
@@ -50,7 +54,7 @@ function Stk() {
          <h1>Bienvenue sur la page de gestion de stock</h1>
             <select value={id} onChange={e => setId(e.target.value)}>
                     <option value="">Choisir</option>
-                        {categories.map((cat, index) => (
+                        {selectableCategories.map((cat, index) => (
                             <option key={`${cat.id}-${index}`} value={cat.id}>{cat.name}</option>
                         ))}
             </select>
