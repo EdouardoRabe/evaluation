@@ -21,7 +21,12 @@ export async function removeProductFromStock(idCategorie, quantity) {
 
         for (const product of filtersProdut) {
             const productAvailable = product.associations.stockAvailables ?? [];
-            const hasDeclination = product.associations.combinations?.length > 0
+
+            const hasDeclination = product.associations?.combinations?.length > 0;
+
+            console.log("has declination ",hasDeclination);
+
+
 
             console.log("productAvailable", productAvailable);
 
@@ -30,9 +35,13 @@ export async function removeProductFromStock(idCategorie, quantity) {
 
                 const quantityActual =Number(stock.quantity ?? 0);
                 const quantityToRemove = Math.max(0, Math.min(quantity, quantityActual));
+
                 console.log("quantityActual", quantityActual);
                 console.log("quantityToRemove", quantityToRemove);
-                total2 += Number(Math.min(quantity, quantityActual));
+
+
+                console.log(" a product attribute", a.idProductAttribute);
+
                 if (hasDeclination && a.idProductAttribute === 0) {
                     continue
                 }   
@@ -49,17 +58,20 @@ export async function removeProductFromStock(idCategorie, quantity) {
                         dateAdd: formatDateTime(new Date()),
                      })
                      total += Number(quantity);
-
+                     total2 += Number(Math.min(quantity, quantityActual));
+                     
                      await movement.save()
                      const update = StockAvailable.fromData(stock);
                      update.quantity = quantityActual - quantityToRemove;
                      await update.update()
                 }
+
                
             }
             console.log("total -- Ho fafana", total);
             console.log("total2 -- Voafafa", total2);
         }
+        return {total: total, removed: total2}
     } catch (error) {
         console.error("Erreur lors de la suppression du produit du stock: " + error);
     }

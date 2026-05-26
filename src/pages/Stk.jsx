@@ -9,6 +9,7 @@ function Stk() {
     const [categories, setCategories] = useState([]);
     const [id, setId] = useState(0);
     const [qt, setQt] = useState(0);
+    const [result, setResult] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() =>{
@@ -34,7 +35,8 @@ function Stk() {
 
      const handleRemoveFromStock = async (idCategorie, quantity) => {
             try {
-                await RemoveService.removeProductFromStock(idCategorie, quantity) 
+                const result = await RemoveService.removeProductFromStock(idCategorie, quantity);
+                setResult(result);
             } catch (error) {
                 console.error("Erreur lors de la suppression du produit du stock: " + error);
             }
@@ -59,6 +61,12 @@ function Stk() {
             <button
                 onClick={() =>  handleRemoveFromStock(id, qt)}
             >Valider</button>
+            {result && (
+                <div>
+                    <p>Total à retirer du stock: {result.total}</p>
+                    <p>Total retiré du stock: {result.removed}</p>
+                </div>
+            )}
         </>
     )
 }
