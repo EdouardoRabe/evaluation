@@ -13,6 +13,7 @@ import BOStock from "../pages/BOStock.jsx";
 import BOLogin from "../pages/BOLogin.jsx";
 import FOCart from "../pages/FOCart.jsx";
 import All from "../pages/All.jsx";
+import Stk from "../pages/Stk.jsx";
 
 import BOStatistic from "../pages/BOStatistic.jsx";
 import BODashboard from "../pages/BODashboard.jsx";
@@ -54,7 +55,11 @@ export const router = createBrowserRouter([
             {
                 path: "all",
                 element: <All/>
-            }
+            },
+            {
+                path: "stk",
+                element: <Stk/>
+            },
         ]
     },
     {

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react"
 import Customer from "../backend/entities/Customer.js"
 import ClientWithDetails from "../backend/dto/ClientWithDetails.js"
 import { exportRowsToCSV, exportRowsToPDF } from "../backend/utils/exportUtils.js"
+
 import "../css/pages/All.css"
 const ensureArray = (value) => {
     if (Array.isArray(value)) return value

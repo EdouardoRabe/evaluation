@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import Product from "../backend/entities/Product.js";
 import Category from "../backend/entities/Category.js";
 import { filterProducts } from "../backend/services/ProductService.js";
+import { Link } from 'react-router-dom';
 import "../css/pages/FOProductList.css";
 
 function FOProductList() {
@@ -76,6 +77,7 @@ function FOProductList() {
             try {
                 const categoryApi = new Category({}, false);
                 const categoryList = await categoryApi.getExcl([1, 2]);
+                const categorySet = new Set(categoryList.map((category) => category.id));
                 if (isActive) {
                     setCategories(categoryList);
                 }
@@ -122,6 +124,8 @@ function FOProductList() {
     return (
         <div className="fo-product-list">
             <h1>Product List</h1>
+
+            <Link to="/stk">Reset</Link>
 
             <div className="fo-product-list__filters">
                 <div className="fo-product-list__filter-group">
