@@ -265,17 +265,17 @@ const validateSingleCsvFile = async ({ file, fileKey, errors, options = {} }) =>
 
 	const rows = await rule.parser(file)
 
-	if (!rows || rows.length === 0) {
-		errors.push({
-			file: rule.label,
-			line: '-',
-			field: '-',
-			value: '-',
-			rule: 'Fichier vide',
-			message: 'Aucune ligne CSV trouvée',
-		})
-		return rows || []
-	}
+	// if (!rows || rows.length === 0) {
+	// 	errors.push({
+	// 		file: rule.label,
+	// 		line: '-',
+	// 		field: '-',
+	// 		value: '-',
+	// 		rule: 'Fichier vide',
+	// 		message: 'Aucune ligne CSV trouvée',
+	// 	})
+	// 	return rows || []
+	// }
 
 	validateColumns(rows, rule.label, rule.allowedColumns, errors)
 	validateRows(rows, rule.label, errors, options)

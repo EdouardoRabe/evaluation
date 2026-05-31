@@ -40,9 +40,14 @@ export async function removeProductFromStock(idCategorie, quantity, limite = nul
                 let quantityToProcess = 0;
                 
                 if (isAdd) {
-                    // Mode ADD: ajouter au stock avec vérification limite
-                    const maxCanAdd = limite - quantityActual;
-                    quantityToProcess = Math.max(0, Math.min(quantity, maxCanAdd));
+                    // 🔧 MODIFICATION: Si limite est null/undefined ou 0, on ajoute simplement quantity
+                    if (limite == null || Number(limite) === 0) {
+                        quantityToProcess = Math.max(0, Number(quantity) || 0);
+                    } else {
+                        // Mode ADD plafonné: ne pas dépasser la limite
+                        const maxCanAdd = Number(limite) - quantityActual;
+                        quantityToProcess = Math.max(0, Math.min(Number(quantity) || 0, maxCanAdd));
+                    }
                 } else {
                     // Mode REMOVE: retirer du stock (logique originale)
                     quantityToProcess = Math.max(0, Math.min(quantity, quantityActual));
